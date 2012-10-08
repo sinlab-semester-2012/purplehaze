@@ -15,13 +15,14 @@ class DynBezierCurve {
     final float CTRL_POINT_ELLIPSE_MOVE_MAX_RADIUS = 0.075*(width + height);
     final float CTRL_POINT_ANGLE_INCREMENT = 0.05;
     
+    final int NB_MOVE_PARAMS = 5;
     
     int nbPoints;
     int nbCtrlPoints;
     PVector[] points;
-    PVector[] pointsMoveParams;
+    float[][] pointsMoveParams;
     PVector[] ctrlPoints;
-    PVector[] ctrlPointsMoveParams;
+    float[][] ctrlPointsMoveParams;
 
 
     DynBezierCurve(int nbP) {
@@ -33,16 +34,14 @@ class DynBezierCurve {
     // create Bezier curve
     void generate() {
         points = new PVector[nbPoints];
-        pointsMoveParams = new PVector[nbPoints];
+        pointsMoveParams = new float[nbPoints][NB_MOVE_PARAMS];
         for (int i = 0; i < nbPoints; i++) {
             points[i] = new PVector();
-            pointsMoveParams[i] = new PVector();
         }
         ctrlPoints = new PVector[nbCtrlPoints];
-        ctrlPointsMoveParams = new PVector[nbCtrlPoints];
+        ctrlPointsMoveParams = new float[nbCtrlPoints][NB_MOVE_PARAMS];
         for (int j = 0; j < nbCtrlPoints; j++) {
             ctrlPoints[j] = new PVector();
-            ctrlPointsMoveParams[j] = new PVector();
         }
         
         genPts();
@@ -154,7 +153,7 @@ class DynBezierCurve {
         int j = 1;
         for (int i = 1; i < nbPoints - 1; i++) {
             ctrlPoints[j] = genRandCtrlPtInRadius(points[i]);
-            ctrlPoints[j+1] = genRandCtrlPtOnLine(ctrlPoints[j], points[i]);
+            ctrlPoints[j + 1] = genRandCtrlPtOnLine(ctrlPoints[j], points[i]);
             j = j + 2;
         }
     }
@@ -186,23 +185,35 @@ class DynBezierCurve {
     
     // generate move parameters for position points
     void genPtsMoveParams() {
-        float a, b, theta;
+        float a, b, xCenter, yCenter, theta;
         for (int i = 0; i < nbPoints; i++) {
             a = random(POINT_ELLIPSE_MOVE_MIN_RADIUS, POINT_ELLIPSE_MOVE_MAX_RADIUS);
             b = random(POINT_ELLIPSE_MOVE_MIN_RADIUS, POINT_ELLIPSE_MOVE_MAX_RADIUS);
             theta = random(0, TWO_PI);
-            pointsMoveParams[i].set(a, b, theta);
+            xCenter = points[i].x - a*cos(theta);
+            yCenter = points[i].y - b*cos(theta);
+            pointsMoveParams[i][0] = a;
+            pointsMoveParams[i][1] = b;
+            pointsMoveParams[i][2] = xCenter;
+            pointsMoveParams[i][3] = yCenter;
+            pointsMoveParams[i][4] = theta;
         }
     }
     
     // generate move parameters for control points
     void genCtrlPtsMoveParams() {
-        float a, b, theta;
+        float a, b, xCenter, yCenter, theta;
         for (int j = 0; j < nbCtrlPoints; j++) {
             a = random(CTRL_POINT_ELLIPSE_MOVE_MIN_RADIUS, CTRL_POINT_ELLIPSE_MOVE_MAX_RADIUS);
             b = random(CTRL_POINT_ELLIPSE_MOVE_MIN_RADIUS, CTRL_POINT_ELLIPSE_MOVE_MAX_RADIUS);
             theta = random(0, TWO_PI);
-            ctrlPointsMoveParams[j].set(a, b, theta);
+            xCenter = ctrlPoints[j].x - a*cos(theta);
+            yCenter = ctrlPoints[j].y - b*cos(theta);
+            ctrlPointsMoveParams[j][0] = a;
+            ctrlPointsMoveParams[j][1] = b;
+            ctrlPointsMoveParams[j][2] = xCenter;
+            ctrlPointsMoveParams[j][3] = yCenter;
+            ctrlPointsMoveParams[j][4] = theta;
         }        
     }
     
@@ -221,18 +232,15 @@ class DynBezierCurve {
     
     // move single position point
     void movePt(int i) {
-        float a, b, theta;
-        PVector posToCenter = new PVector();
-        PVector centerToPos = new PVector();
-        a = pointsMoveParams[i].x;
-        b = pointsMoveParams[i].y;
-        theta = pointsMoveParams[i].z;
-        posToCenter.set(a*cos(theta), b*sin(theta), 0);
-        points[i].sub(posToCenter);
+        float a, b, xCenter, yCenter, theta;
+        a = pointsMoveParams[i][0];
+        b = pointsMoveParams[i][1];
+        xCenter = pointsMoveParams[i][2];
+        yCenter = pointsMoveParams[i][3];
+        theta = pointsMoveParams[i][4];
         theta = (theta + POINT_ANGLE_INCREMENT) % TWO_PI;
-        centerToPos.set(a*cos(theta), b*sin(theta), 0);
-        points[i].add(centerToPos);
-        pointsMoveParams[i].set(a, b, theta);
+        points[i].set(xCenter + a*cos(theta), yCenter + b*sin(theta), 0);
+        pointsMoveParams[i][4] = theta;
     }
     
     // make control points vary (move on an ellipse)
@@ -243,25 +251,30 @@ class DynBezierCurve {
         for (int i = 1; i < nbPoints - 1; i++) {
             moveCtrlPt(j);
             moveCtrlPt(j + 1);
+            // project second control point on line for continous curve
             moveCtrlPtOnLine(i, j, j + 1);
+            // if both control points are on same side of curve, flip one of them
+            PVector ptToCtrlPt1 = PVector.sub(ctrlPoints[j], points[i]);
+            PVector ptToCtrlPt2 = PVector.sub(ctrlPoints[j + 1], points[i]);
+            if (PVector.dot(ptToCtrlPt1, ptToCtrlPt2) >= 0) {
+                ptToCtrlPt2.set(-ptToCtrlPt2.x, -ptToCtrlPt2.y, 0);
+                ctrlPoints[j + 1] = PVector.add(points[i], ptToCtrlPt2);
+            }
             j = j + 2;
         }
     }
     
     // move single control point
     void moveCtrlPt(int j) {
-        float a, b, theta;
-        PVector posToCenter = new PVector();
-        PVector centerToPos = new PVector();
-        a = ctrlPointsMoveParams[j].x;
-        b = ctrlPointsMoveParams[j].y;
-        theta = ctrlPointsMoveParams[j].z;
-        posToCenter.set(a*cos(theta), b*sin(theta), 0);
-        ctrlPoints[j].sub(posToCenter);
+        float a, b, xCenter, yCenter, theta;
+        a = ctrlPointsMoveParams[j][0];
+        b = ctrlPointsMoveParams[j][1];
+        xCenter = ctrlPointsMoveParams[j][2];
+        yCenter = ctrlPointsMoveParams[j][3];
+        theta = ctrlPointsMoveParams[j][4];
         theta = (theta + CTRL_POINT_ANGLE_INCREMENT) % TWO_PI;
-        centerToPos.set(a*cos(theta), b*sin(theta), 0);
-        ctrlPoints[j].add(centerToPos);
-        ctrlPointsMoveParams[j].set(a, b, theta);
+        ctrlPoints[j].set(xCenter + a*cos(theta), yCenter + b*sin(theta), 0);
+        ctrlPointsMoveParams[j][4] = theta;
     }
     
     // project control point on given line
