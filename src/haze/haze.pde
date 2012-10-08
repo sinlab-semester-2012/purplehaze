@@ -1,10 +1,10 @@
 DynBezierCurve dynBezierCurve;
 
 void setup() {
-    size(640, 480);
+    size(800, 600);
     background(0);
     
-    dynBezierCurve = new DynBezierCurve(2, width, height);
+    dynBezierCurve = new DynBezierCurve(2);
 }
 
 void draw() {
