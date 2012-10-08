@@ -5,7 +5,7 @@ class DynBezierCurve {
     final int MAX_NB_POINTS = 7;
     
     final float POINT_LOCATION_RANGE = 0.1*(width + height);
-    final float CTRL_POINT_LOCATION_RANGE = 0.25*(width + height);
+    final float CTRL_POINT_LOCATION_RANGE = 0.2*(width + height);
     
     final float POINT_ELLIPSE_MOVE_MIN_RADIUS = 0;
     final float POINT_ELLIPSE_MOVE_MAX_RADIUS = 0.05*(width + height);
@@ -154,9 +154,7 @@ class DynBezierCurve {
         int j = 1;
         for (int i = 1; i < nbPoints - 1; i++) {
             ctrlPoints[j] = genRandCtrlPtInRadius(points[i]);
-            direction = PVector.sub(points[i], ctrlPoints[j]);
-            direction.div(direction.mag());
-            ctrlPoints[j+1] = genRandCtrlPtOnLine(points[i], direction);
+            ctrlPoints[j+1] = genRandCtrlPtOnLine(ctrlPoints[j], points[i]);
             j = j + 2;
         }
     }
@@ -170,12 +168,14 @@ class DynBezierCurve {
         return ctrlPt;
     }
     
-    // get random control point on line given by point and direction
-    PVector genRandCtrlPtOnLine(PVector pt, PVector dir) {
-        PVector ctrlPt;
+    // get random control point on line given by control point and position point
+    PVector genRandCtrlPtOnLine(PVector ctrlPt, PVector pt) {
+        PVector newCtrlPt;
+        PVector dir = PVector.sub(pt, ctrlPt);
+        dir.div(dir.mag());
         PVector dirMult = PVector.mult(dir, random(0, CTRL_POINT_LOCATION_RANGE));
-        ctrlPt = PVector.add(pt, dirMult);
-        return ctrlPt;
+        newCtrlPt = PVector.add(pt, dirMult);
+        return newCtrlPt;
     }
     
     // generate move parameters
@@ -214,52 +214,96 @@ class DynBezierCurve {
     
     // make position points vary (move on an ellipse)
     void movePts() {
+        for (int i = 1; i < nbPoints - 1; i++) {
+            movePt(i);
+        }
+    }
+    
+    // move single position point
+    void movePt(int i) {
         float a, b, theta;
         PVector posToCenter = new PVector();
-        PVector centerToPos = new PVector(); 
-        for (int i = 1; i < nbPoints - 1; i++) {
-            a = pointsMoveParams[i].x;
-            b = pointsMoveParams[i].y;
-            theta = pointsMoveParams[i].z;
-            posToCenter.set(a*cos(theta), b*sin(theta), 0);
-            points[i].sub(posToCenter);
-            theta = (theta + POINT_ANGLE_INCREMENT) % TWO_PI;
-            centerToPos.set(a*cos(theta), b*sin(theta), 0);
-            points[i].add(centerToPos);
-            pointsMoveParams[i].set(a, b, theta);
-        }
+        PVector centerToPos = new PVector();
+        a = pointsMoveParams[i].x;
+        b = pointsMoveParams[i].y;
+        theta = pointsMoveParams[i].z;
+        posToCenter.set(a*cos(theta), b*sin(theta), 0);
+        points[i].sub(posToCenter);
+        theta = (theta + POINT_ANGLE_INCREMENT) % TWO_PI;
+        centerToPos.set(a*cos(theta), b*sin(theta), 0);
+        points[i].add(centerToPos);
+        pointsMoveParams[i].set(a, b, theta);
     }
     
     // make control points vary (move on an ellipse)
     void moveCtrlPts() {
+        moveCtrlPt(0);
+        moveCtrlPt(nbCtrlPoints - 1);
+        int j = 1;
+        for (int i = 1; i < nbPoints - 1; i++) {
+            moveCtrlPt(j);
+            moveCtrlPt(j + 1);
+            moveCtrlPtOnLine(i, j, j + 1);
+            j = j + 2;
+        }
+    }
+    
+    // move single control point
+    void moveCtrlPt(int j) {
         float a, b, theta;
         PVector posToCenter = new PVector();
-        PVector centerToPos = new PVector(); 
-        for (int j = 0; j < nbCtrlPoints; j++) {
-            a = ctrlPointsMoveParams[j].x;
-            b = ctrlPointsMoveParams[j].y;
-            theta = ctrlPointsMoveParams[j].z;
-            posToCenter.set(a*cos(theta), b*sin(theta), 0);
-            ctrlPoints[j].sub(posToCenter);
-            theta = (theta + POINT_ANGLE_INCREMENT) % TWO_PI;
-            centerToPos.set(a*cos(theta), b*sin(theta), 0);
-            ctrlPoints[j].add(centerToPos);
-            ctrlPointsMoveParams[j].set(a, b, theta);
-        }
+        PVector centerToPos = new PVector();
+        a = ctrlPointsMoveParams[j].x;
+        b = ctrlPointsMoveParams[j].y;
+        theta = ctrlPointsMoveParams[j].z;
+        posToCenter.set(a*cos(theta), b*sin(theta), 0);
+        ctrlPoints[j].sub(posToCenter);
+        theta = (theta + CTRL_POINT_ANGLE_INCREMENT) % TWO_PI;
+        centerToPos.set(a*cos(theta), b*sin(theta), 0);
+        ctrlPoints[j].add(centerToPos);
+        ctrlPointsMoveParams[j].set(a, b, theta);
+    }
+    
+    // project control point on given line
+    void moveCtrlPtOnLine(int i, int j1, int j2) {
+        PVector dir = PVector.sub(points[i], ctrlPoints[j1]);
+        dir.div(dir.mag());
+        PVector ctrlPt1ToCtrlPt2 = PVector.sub(ctrlPoints[j2], ctrlPoints[j1]);
+        PVector mov = PVector.mult(dir, PVector.dot(dir, ctrlPt1ToCtrlPt2));
+        ctrlPoints[j2] = PVector.add(ctrlPoints[j1], mov);
     }
     
     // draw Bezier curve on screen
     void draw() {
+        // draw position points and control points
         noStroke();
-        for (int i = 0; i < nbPoints; i++) {
+        fill(0, 255, 0);
+        ellipse(points[0].x, points[0].y, 20, 20);
+        ellipse(points[nbPoints - 1].x, points[nbPoints - 1].y, 20, 20);
+        fill(255, 0, 0);
+        ellipse(ctrlPoints[0].x, ctrlPoints[0].y, 10, 10);
+        ellipse(ctrlPoints[nbCtrlPoints - 1].x, ctrlPoints[nbCtrlPoints - 1].y, 10, 10);
+        strokeWeight(1);
+        stroke(255, 0, 0);
+        line(ctrlPoints[0].x, ctrlPoints[0].y, points[0].x, points[0].y);
+        line(ctrlPoints[nbCtrlPoints - 1].x, ctrlPoints[nbCtrlPoints - 1].y, points[nbPoints - 1].x, points[nbPoints - 1].y);
+        noStroke();
+        int n = 1;
+        for (int m = 1; m < nbPoints - 1; m++) {
             fill(0, 255, 0);
-            ellipse(points[i].x, points[i].y, 20, 20);
-        }
-        for (int j = 0; j < nbCtrlPoints; j++) {
+            ellipse(points[m].x, points[m].y, 20, 20);
             fill(255, 0, 0);
-            ellipse(ctrlPoints[j].x, ctrlPoints[j].y, 10, 10);
+            ellipse(ctrlPoints[n].x, ctrlPoints[n].y, 10, 10);
+            ellipse(ctrlPoints[n + 1].x, ctrlPoints[n + 1].y, 10, 10);
+            strokeWeight(1);
+            stroke(255, 0, 0);
+            line(ctrlPoints[n].x, ctrlPoints[n].y, points[m].x, points[m].y);
+            line(ctrlPoints[n + 1].x, ctrlPoints[n + 1].y, points[m].x, points[m].y);
+            noStroke();
+            n = n + 2;
         }
         
+        // draw curve
         stroke(255);
         strokeWeight(10);
         noFill();
