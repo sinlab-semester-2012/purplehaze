@@ -23,27 +23,45 @@ class DynBezierCurve {
     float[][] pointsMoveParams;
     PVector[] ctrlPoints;
     float[][] ctrlPointsMoveParams;
+    boolean fixedFirstLastPts;
 
 
     DynBezierCurve(int nbP) {
-        nbPoints = nbP;
+        nbPoints = max(MIN_NB_POINTS, min(nbP, MAX_NB_POINTS));
         nbCtrlPoints = 2*nbPoints - 2;
+        fixedFirstLastPts = false;
+        initialize();
         generate();
     }
     
-    // create Bezier curve
-    void generate() {
+    // initialize data
+    void initialize() {
+        PVector tmpFirst = new PVector();
+        PVector tmpLast = new PVector();
+        if (points != null && fixedFirstLastPts) {
+            tmpFirst = points[0];
+            tmpLast = points[points.length - 1];
+        }
+        
         points = new PVector[nbPoints];
         pointsMoveParams = new float[nbPoints][NB_MOVE_PARAMS];
         for (int i = 0; i < nbPoints; i++) {
             points[i] = new PVector();
         }
+        if (fixedFirstLastPts) {
+            points[0] = tmpFirst;
+            points[points.length - 1] = tmpLast;
+        }
+        
         ctrlPoints = new PVector[nbCtrlPoints];
         ctrlPointsMoveParams = new float[nbCtrlPoints][NB_MOVE_PARAMS];
         for (int j = 0; j < nbCtrlPoints; j++) {
             ctrlPoints[j] = new PVector();
         }
-        
+    }
+    
+    // create Bezier curve
+    void generate() {
         genPts();
         genCtrlPts();
         genMoveParams();
@@ -51,7 +69,9 @@ class DynBezierCurve {
     
     // generate points (positions)
     void genPts() {
-        genFirstLastPts();
+        if (!fixedFirstLastPts) {
+            genFirstLastPts();
+        }
         if (nbPoints >= 3) {
             genMiddlePts();
         }
@@ -184,9 +204,10 @@ class DynBezierCurve {
     }
     
     // generate move parameters for position points
+    // (except for first and last points)
     void genPtsMoveParams() {
         float a, b, xCenter, yCenter, theta;
-        for (int i = 0; i < nbPoints; i++) {
+        for (int i = 1; i < nbPoints - 1; i++) {
             a = random(POINT_ELLIPSE_MOVE_MIN_RADIUS, POINT_ELLIPSE_MOVE_MAX_RADIUS);
             b = random(POINT_ELLIPSE_MOVE_MIN_RADIUS, POINT_ELLIPSE_MOVE_MAX_RADIUS);
             theta = random(0, TWO_PI);
@@ -224,6 +245,7 @@ class DynBezierCurve {
     }
     
     // make position points vary (move on an ellipse)
+    // (except for the first and last one)
     void movePts() {
         for (int i = 1; i < nbPoints - 1; i++) {
             movePt(i);
@@ -315,6 +337,14 @@ class DynBezierCurve {
             noStroke();
             n = n + 2;
         }
+        textAlign(RIGHT);
+        if (fixedFirstLastPts) {
+            fill(0, 255, 0);
+            text("Fixed First and Last Points: ON", width - 10, height - 10);
+        } else {
+            fill(255, 0, 0);
+            text("Fixed First and Last Points: OFF", width - 10, height - 10);
+        }
         
         // draw curve
         stroke(255);
@@ -331,12 +361,17 @@ class DynBezierCurve {
         }
         endShape();
     }
+    
+    void reset() {
+        generate();
+    }
 
     // decrease number of position points
     void decreaseNbPoints() {
         if (nbPoints > MIN_NB_POINTS) {
             nbPoints--;
             nbCtrlPoints = 2*nbPoints - 2;
+            initialize();
             generate();
         }
     }
@@ -346,8 +381,13 @@ class DynBezierCurve {
         if (nbPoints < MAX_NB_POINTS) {
             nbPoints++;
             nbCtrlPoints = 2*nbPoints - 2;
+            initialize();
             generate();
         }
+    }
+    
+    void toggleFixedFirstLastPts() {
+        fixedFirstLastPts = !fixedFirstLastPts;
     }
 }
 
