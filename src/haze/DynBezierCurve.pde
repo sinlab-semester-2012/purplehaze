@@ -13,9 +13,12 @@ class DynBezierCurve {
     
     final float CTRL_POINT_ELLIPSE_MOVE_MIN_RADIUS = 0;
     final float CTRL_POINT_ELLIPSE_MOVE_MAX_RADIUS = 0.075*(width + height);
-    final float CTRL_POINT_ANGLE_INCREMENT = 0.05;
+    final float CTRL_POINT_ANGLE_INCREMENT = 0.03;
     
     final int NB_MOVE_PARAMS = 5;
+    
+    final color CURVE_COLOR = color(255);
+    final float CURVE_STROKE_WEIGHT = 0.0075*(width + height);
     
     int nbPoints;
     int nbCtrlPoints;
@@ -24,6 +27,7 @@ class DynBezierCurve {
     PVector[] ctrlPoints;
     float[][] ctrlPointsMoveParams;
     boolean fixedFirstLastPts;
+    boolean debugDisplay;
 
 
     DynBezierCurve(int nbP) {
@@ -32,6 +36,7 @@ class DynBezierCurve {
         fixedFirstLastPts = false;
         initialize();
         generate();
+        debugDisplay = true;
     }
     
     // initialize data
@@ -310,45 +315,47 @@ class DynBezierCurve {
     
     // draw Bezier curve on screen
     void draw() {
-        // draw position points and control points
-        noStroke();
-        fill(0, 255, 0);
-        ellipse(points[0].x, points[0].y, 20, 20);
-        ellipse(points[nbPoints - 1].x, points[nbPoints - 1].y, 20, 20);
-        fill(255, 0, 0);
-        ellipse(ctrlPoints[0].x, ctrlPoints[0].y, 10, 10);
-        ellipse(ctrlPoints[nbCtrlPoints - 1].x, ctrlPoints[nbCtrlPoints - 1].y, 10, 10);
-        strokeWeight(1);
-        stroke(255, 0, 0);
-        line(ctrlPoints[0].x, ctrlPoints[0].y, points[0].x, points[0].y);
-        line(ctrlPoints[nbCtrlPoints - 1].x, ctrlPoints[nbCtrlPoints - 1].y, points[nbPoints - 1].x, points[nbPoints - 1].y);
-        noStroke();
-        int n = 1;
-        for (int m = 1; m < nbPoints - 1; m++) {
+        if (debugDisplay) {
+            // draw position points and control points
+            noStroke();
             fill(0, 255, 0);
-            ellipse(points[m].x, points[m].y, 20, 20);
+            ellipse(points[0].x, points[0].y, 20, 20);
+            ellipse(points[nbPoints - 1].x, points[nbPoints - 1].y, 20, 20);
             fill(255, 0, 0);
-            ellipse(ctrlPoints[n].x, ctrlPoints[n].y, 10, 10);
-            ellipse(ctrlPoints[n + 1].x, ctrlPoints[n + 1].y, 10, 10);
+            ellipse(ctrlPoints[0].x, ctrlPoints[0].y, 10, 10);
+            ellipse(ctrlPoints[nbCtrlPoints - 1].x, ctrlPoints[nbCtrlPoints - 1].y, 10, 10);
             strokeWeight(1);
             stroke(255, 0, 0);
-            line(ctrlPoints[n].x, ctrlPoints[n].y, points[m].x, points[m].y);
-            line(ctrlPoints[n + 1].x, ctrlPoints[n + 1].y, points[m].x, points[m].y);
+            line(ctrlPoints[0].x, ctrlPoints[0].y, points[0].x, points[0].y);
+            line(ctrlPoints[nbCtrlPoints - 1].x, ctrlPoints[nbCtrlPoints - 1].y, points[nbPoints - 1].x, points[nbPoints - 1].y);
             noStroke();
-            n = n + 2;
-        }
-        textAlign(RIGHT);
-        if (fixedFirstLastPts) {
-            fill(0, 255, 0);
-            text("Fixed First and Last Points: ON", width - 10, height - 10);
-        } else {
-            fill(255, 0, 0);
-            text("Fixed First and Last Points: OFF", width - 10, height - 10);
+            int n = 1;
+            for (int m = 1; m < nbPoints - 1; m++) {
+                fill(0, 255, 0);
+                ellipse(points[m].x, points[m].y, 20, 20);
+                fill(255, 0, 0);
+                ellipse(ctrlPoints[n].x, ctrlPoints[n].y, 10, 10);
+                ellipse(ctrlPoints[n + 1].x, ctrlPoints[n + 1].y, 10, 10);
+                strokeWeight(1);
+                stroke(255, 0, 0);
+                line(ctrlPoints[n].x, ctrlPoints[n].y, points[m].x, points[m].y);
+                line(ctrlPoints[n + 1].x, ctrlPoints[n + 1].y, points[m].x, points[m].y);
+                noStroke();
+                n = n + 2;
+            }
+            textAlign(RIGHT);
+            if (fixedFirstLastPts) {
+                fill(0, 255, 0);
+                text("Fixed First and Last Points: ON", width - 10, height - 10);
+            } else {
+                fill(255, 0, 0);
+                text("Fixed First and Last Points: OFF", width - 10, height - 10);
+            }
         }
         
         // draw curve
-        stroke(255);
-        strokeWeight(10);
+        stroke(CURVE_COLOR);
+        strokeWeight(CURVE_STROKE_WEIGHT);
         noFill();
         beginShape();
         vertex(points[0].x, points[0].y);
@@ -362,10 +369,16 @@ class DynBezierCurve {
         endShape();
     }
     
+    // regenerate curve
     void reset() {
         generate();
     }
-
+    
+    // toggle graphical debug informations
+    void toggleDebugDisplay() {
+        debugDisplay = !debugDisplay;
+    }
+    
     // decrease number of position points
     void decreaseNbPoints() {
         if (nbPoints > MIN_NB_POINTS) {
@@ -386,6 +399,7 @@ class DynBezierCurve {
         }
     }
     
+    // toggle fixed positions of first and last points
     void toggleFixedFirstLastPts() {
         fixedFirstLastPts = !fixedFirstLastPts;
     }
