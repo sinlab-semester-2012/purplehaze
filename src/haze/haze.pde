@@ -1,7 +1,7 @@
 DynBezierCurve dynBezierCurve;
 
 void setup() {
-    size(800, 600);
+    size(640, 480);
     background(0);
     
     dynBezierCurve = new DynBezierCurve(2);
@@ -9,14 +9,14 @@ void setup() {
 
 void draw() {
     background(0);
-    dynBezierCurve.move();
     dynBezierCurve.draw();
+    dynBezierCurve.move();
 }
 
 void keyPressed() {
     if (key == ENTER || key == RETURN) {
         dynBezierCurve.reset();
-    } else if (key == ' ') {
+    } else if (key == '.') {
         dynBezierCurve.toggleDebugDisplay();
     } else if (key == '-') {
         dynBezierCurve.decreaseNbPoints();
