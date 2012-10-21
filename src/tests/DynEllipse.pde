@@ -1,9 +1,9 @@
 class DynEllipse {
     
-    float MIN_WIDTH = 150;
-    float MAX_WIDTH = 250;
-    float MIN_HEIGHT = 150;
-    float MAX_HEIGHT = 250;
+    float MIN_WIDTH = 0.05*(width + height);
+    float MAX_WIDTH = 0.1*(width + height);
+    float MIN_HEIGHT = 0.05*(width + height);
+    float MAX_HEIGHT = 0.1*(width + height);
     
     float x;
     float y;
@@ -15,13 +15,7 @@ class DynEllipse {
     float b;
 
     DynEllipse() {
-        x = 0;
-        y = 0;
-        w = 0;
-        h = 0;
-        r = 0;
-        g = 0;
-        b = 0;
+        generateRandPosDynEllipse();
     }
     
     void generateDynEllipse() {
@@ -29,7 +23,14 @@ class DynEllipse {
         setColor(random(0, 255), random(0, 255), random(0, 255));
     }
     
+    void generateRandPosDynEllipse() {
+        x = random(0, width);
+        y = random(0, height);
+        generateDynEllipse();
+    }
+    
     void drawDynEllipse() {
+        noStroke();
         fill(r, g, b);
         ellipseMode(CENTER);
         ellipse(x, y, w, h);
