@@ -7,15 +7,15 @@ class DynBezierCurve {
     final float POINT_LOCATION_RANGE = 0.1*(width + height);
     final float CTRL_POINT_LOCATION_RANGE = 0.2*(width + height);
     
-    final float POINT_ELLIPSE_MOVE_MIN_RADIUS = 0;
-    final float POINT_ELLIPSE_MOVE_MAX_RADIUS = 0.05*(width + height);
+    final int NB_MOTION_PARAMS = 7;
+    final float POINT_MOTION_ELLIPSE_MIN_RADIUS = 0;
+    final float POINT_MOTION_ELLIPSE_MAX_RADIUS = 0.025*(width + height);
     final float POINT_ANGLE_INCREMENT = 0.05;
-    
-    final float CTRL_POINT_ELLIPSE_MOVE_MIN_RADIUS = 0;
-    final float CTRL_POINT_ELLIPSE_MOVE_MAX_RADIUS = 0.075*(width + height);
+    final float CTRL_POINT_MOTION_ELLIPSE_MIN_RADIUS = 0;
+    final float CTRL_POINT_MOTION_ELLIPSE_MAX_RADIUS = 0.075*(width + height);
     final float CTRL_POINT_ANGLE_INCREMENT = 0.03;
     
-    final int NB_MOVE_PARAMS = 5;
+    final float NEAREST_MOTION_ELLIPSE_RADIUS = 0.075*(width + height);
     
     final color CURVE_COLOR = color(255);
     final float CURVE_STROKE_WEIGHT = 0.0075*(width + height);
@@ -23,9 +23,9 @@ class DynBezierCurve {
     int nbPoints;
     int nbCtrlPoints;
     PVector[] points;
-    float[][] pointsMoveParams;
+    float[][] pointsMotionParams;
     PVector[] ctrlPoints;
-    float[][] ctrlPointsMoveParams;
+    float[][] ctrlPointsMotionParams;
     boolean fixedFirstLastPts;
     boolean debugDisplay;
 
@@ -49,7 +49,7 @@ class DynBezierCurve {
         }
         
         points = new PVector[nbPoints];
-        pointsMoveParams = new float[nbPoints][NB_MOVE_PARAMS];
+        pointsMotionParams = new float[nbPoints][NB_MOTION_PARAMS];
         for (int i = 0; i < nbPoints; i++) {
             points[i] = new PVector();
         }
@@ -59,7 +59,7 @@ class DynBezierCurve {
         }
         
         ctrlPoints = new PVector[nbCtrlPoints];
-        ctrlPointsMoveParams = new float[nbCtrlPoints][NB_MOVE_PARAMS];
+        ctrlPointsMotionParams = new float[nbCtrlPoints][NB_MOTION_PARAMS];
         for (int j = 0; j < nbCtrlPoints; j++) {
             ctrlPoints[j] = new PVector();
         }
@@ -69,7 +69,7 @@ class DynBezierCurve {
     void generate() {
         genPts();
         genCtrlPts();
-        genMoveParams();
+        genMotionParams();
     }
     
     // generate points (positions)
@@ -203,43 +203,51 @@ class DynBezierCurve {
     }
     
     // generate move parameters
-    void genMoveParams() {
-        genPtsMoveParams();
-        genCtrlPtsMoveParams();
+    void genMotionParams() {
+        genPtsMotionParams();
+        genCtrlPtsMotionParams();
     }
     
     // generate move parameters for position points
     // (except for first and last points)
-    void genPtsMoveParams() {
-        float a, b, xCenter, yCenter, theta;
+    void genPtsMotionParams() {
+        float a, b, xCenterOrig, yCenterOrig, xCenterTemp, yCenterTemp, theta;
         for (int i = 1; i < nbPoints - 1; i++) {
-            a = random(POINT_ELLIPSE_MOVE_MIN_RADIUS, POINT_ELLIPSE_MOVE_MAX_RADIUS);
-            b = random(POINT_ELLIPSE_MOVE_MIN_RADIUS, POINT_ELLIPSE_MOVE_MAX_RADIUS);
+            a = random(POINT_MOTION_ELLIPSE_MIN_RADIUS, POINT_MOTION_ELLIPSE_MAX_RADIUS);
+            b = random(POINT_MOTION_ELLIPSE_MIN_RADIUS, POINT_MOTION_ELLIPSE_MAX_RADIUS);
             theta = random(0, TWO_PI);
-            xCenter = points[i].x - a*cos(theta);
-            yCenter = points[i].y - b*cos(theta);
-            pointsMoveParams[i][0] = a;
-            pointsMoveParams[i][1] = b;
-            pointsMoveParams[i][2] = xCenter;
-            pointsMoveParams[i][3] = yCenter;
-            pointsMoveParams[i][4] = theta;
+            xCenterOrig = points[i].x - a*cos(theta);
+            yCenterOrig = points[i].y - b*cos(theta);
+            xCenterTemp = xCenterOrig;
+            yCenterTemp = yCenterOrig;
+            pointsMotionParams[i][0] = a;
+            pointsMotionParams[i][1] = b;
+            pointsMotionParams[i][2] = xCenterOrig;
+            pointsMotionParams[i][3] = yCenterOrig;
+            pointsMotionParams[i][4] = xCenterTemp;
+            pointsMotionParams[i][5] = yCenterTemp;
+            pointsMotionParams[i][6] = theta;
         }
     }
     
     // generate move parameters for control points
-    void genCtrlPtsMoveParams() {
-        float a, b, xCenter, yCenter, theta;
+    void genCtrlPtsMotionParams() {
+        float a, b, xCenterOrig, yCenterOrig, xCenterTemp, yCenterTemp, theta;
         for (int j = 0; j < nbCtrlPoints; j++) {
-            a = random(CTRL_POINT_ELLIPSE_MOVE_MIN_RADIUS, CTRL_POINT_ELLIPSE_MOVE_MAX_RADIUS);
-            b = random(CTRL_POINT_ELLIPSE_MOVE_MIN_RADIUS, CTRL_POINT_ELLIPSE_MOVE_MAX_RADIUS);
+            a = random(CTRL_POINT_MOTION_ELLIPSE_MIN_RADIUS, CTRL_POINT_MOTION_ELLIPSE_MAX_RADIUS);
+            b = random(CTRL_POINT_MOTION_ELLIPSE_MIN_RADIUS, CTRL_POINT_MOTION_ELLIPSE_MAX_RADIUS);
             theta = random(0, TWO_PI);
-            xCenter = ctrlPoints[j].x - a*cos(theta);
-            yCenter = ctrlPoints[j].y - b*cos(theta);
-            ctrlPointsMoveParams[j][0] = a;
-            ctrlPointsMoveParams[j][1] = b;
-            ctrlPointsMoveParams[j][2] = xCenter;
-            ctrlPointsMoveParams[j][3] = yCenter;
-            ctrlPointsMoveParams[j][4] = theta;
+            xCenterOrig = ctrlPoints[j].x - a*cos(theta);
+            yCenterOrig = ctrlPoints[j].y - b*cos(theta);
+            xCenterTemp = xCenterOrig;
+            yCenterTemp = yCenterOrig;
+            ctrlPointsMotionParams[j][0] = a;
+            ctrlPointsMotionParams[j][1] = b;
+            ctrlPointsMotionParams[j][2] = xCenterOrig;
+            ctrlPointsMotionParams[j][3] = yCenterOrig;
+            ctrlPointsMotionParams[j][4] = xCenterTemp;
+            ctrlPointsMotionParams[j][5] = yCenterTemp;
+            ctrlPointsMotionParams[j][6] = theta;
         }        
     }
     
@@ -259,15 +267,15 @@ class DynBezierCurve {
     
     // move single position point
     void movePt(int i) {
-        float a, b, xCenter, yCenter, theta;
-        a = pointsMoveParams[i][0];
-        b = pointsMoveParams[i][1];
-        xCenter = pointsMoveParams[i][2];
-        yCenter = pointsMoveParams[i][3];
-        theta = pointsMoveParams[i][4];
+        float a, b, xCenterTemp, yCenterTemp, theta;
+        a = pointsMotionParams[i][0];
+        b = pointsMotionParams[i][1];
+        xCenterTemp = pointsMotionParams[i][4];
+        yCenterTemp = pointsMotionParams[i][5];
+        theta = pointsMotionParams[i][6];
         theta = (theta + POINT_ANGLE_INCREMENT) % TWO_PI;
-        points[i].set(xCenter + a*cos(theta), yCenter + b*sin(theta), 0);
-        pointsMoveParams[i][4] = theta;
+        points[i].set(xCenterTemp + a*cos(theta), yCenterTemp + b*sin(theta), 0);
+        pointsMotionParams[i][6] = theta;
     }
     
     // make control points vary (move on an ellipse)
@@ -293,15 +301,15 @@ class DynBezierCurve {
     
     // move single control point
     void moveCtrlPt(int j) {
-        float a, b, xCenter, yCenter, theta;
-        a = ctrlPointsMoveParams[j][0];
-        b = ctrlPointsMoveParams[j][1];
-        xCenter = ctrlPointsMoveParams[j][2];
-        yCenter = ctrlPointsMoveParams[j][3];
-        theta = ctrlPointsMoveParams[j][4];
+        float a, b, xCenterTemp, yCenterTemp, theta;
+        a = ctrlPointsMotionParams[j][0];
+        b = ctrlPointsMotionParams[j][1];
+        xCenterTemp = ctrlPointsMotionParams[j][4];
+        yCenterTemp = ctrlPointsMotionParams[j][5];
+        theta = ctrlPointsMotionParams[j][6];
         theta = (theta + CTRL_POINT_ANGLE_INCREMENT) % TWO_PI;
-        ctrlPoints[j].set(xCenter + a*cos(theta), yCenter + b*sin(theta), 0);
-        ctrlPointsMoveParams[j][4] = theta;
+        ctrlPoints[j].set(xCenterTemp + a*cos(theta), yCenterTemp + b*sin(theta), 0);
+        ctrlPointsMotionParams[j][6] = theta;
     }
     
     // project control point on given line
@@ -309,8 +317,74 @@ class DynBezierCurve {
         PVector dir = PVector.sub(points[i], ctrlPoints[j1]);
         dir.div(dir.mag());
         PVector ctrlPt1ToCtrlPt2 = PVector.sub(ctrlPoints[j2], ctrlPoints[j1]);
-        PVector mov = PVector.mult(dir, PVector.dot(dir, ctrlPt1ToCtrlPt2));
-        ctrlPoints[j2] = PVector.add(ctrlPoints[j1], mov);
+        PVector proj = PVector.mult(dir, PVector.dot(dir, ctrlPt1ToCtrlPt2));
+        ctrlPoints[j2] = PVector.add(ctrlPoints[j1], proj);
+    }
+    
+    // make curve interact with detected blobs
+    void interact(Blob[] blobs) {
+        //if (blobs != null && blobs.length > 0) {
+            PVector blobCenter = new PVector();
+            int[] nearestMotionEllipsesIndices = null;
+            int index;
+            PVector motionEllipseCenter = new PVector();
+            float distance;
+            PVector direction, displacement;
+            
+            //for (int i = 0; i < blobs.length; i++) {
+                blobCenter.set(mouseX/*blobs[i].centroid.x*/, mouseY/*blobs[i].centroid.y*/, 0);
+                
+                nearestMotionEllipsesIndices = getNearestMotionEllipsesIndices(blobCenter);
+                
+                if (nearestMotionEllipsesIndices != null && nearestMotionEllipsesIndices.length > 0) {
+                    for (int k = 0; k < nearestMotionEllipsesIndices.length; k++) {
+                        index = nearestMotionEllipsesIndices[k];
+                        float xCenterOrig = pointsMotionParams[index][2];
+                        float yCenterOrig = pointsMotionParams[index][3];
+                        motionEllipseCenter.set(xCenterOrig, yCenterOrig, 0);
+                        
+                        distance = (PVector.sub(motionEllipseCenter, blobCenter)).mag();
+                        direction = PVector.sub(motionEllipseCenter, blobCenter);
+                        direction.div(direction.mag());
+                        
+                        displacement = PVector.mult(direction, NEAREST_MOTION_ELLIPSE_RADIUS - distance);
+                        float xCenterTemp = xCenterTemp + displacement.x;
+                        float yCenterTemp = yCenterTemp + displacement.y;
+                        pointsMotionParams[index][4] = xCenterTemp;
+                        pointsMotionParams[index][5] = yCenterTemp;
+                    }
+                }
+            //}
+        //}
+    }
+    
+    // get array of indices of nearest motion ellipse centers to particular point 
+    // (excluding first and last points)
+    int[] getNearestMotionEllipsesIndices(PVector pt) {
+        int[] nearestMtnEllIdcs = null;
+        int[] tmpIdcs = new int[nbPoints];
+        PVector mtnEllCenter = new PVector();
+        float distance;
+        
+        int count = 0;
+        for (int i = 1; i < nbPoints - 1; i++) {
+            float xCenterOrig = pointsMotionParams[i][2];
+            float yCenterOrig = pointsMotionParams[i][3];
+            mtnEllCenter.set(xCenterOrig, yCenterOrig, 0);
+            
+            distance = (PVector.sub(mtnEllCenter, pt)).mag();
+            if (distance <= NEAREST_MOTION_ELLIPSE_RADIUS) {
+                tmpIdcs[count] = i;
+                count++;
+            }
+        }
+        if (count > 0) {
+            nearestMtnEllIdcs = new int[count];
+            for (int k = 0; k < count; k++) {
+                nearestMtnEllIdcs[k] = tmpIdcs[k];
+            }
+        }
+        return nearestMtnEllIdcs;
     }
     
     // draw Bezier curve on screen

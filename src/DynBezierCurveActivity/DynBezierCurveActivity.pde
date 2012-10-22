@@ -1,3 +1,11 @@
+import codeanticode.gsvideo.*;
+import monclubelec.javacvPro.*;
+
+
+GSCapture cam;
+OpenCV opencv;
+
+Blob[] blobs;
 DynBezierCurve dynBezierCurve;
 
 void setup() {
@@ -11,6 +19,7 @@ void draw() {
     background(0);
     dynBezierCurve.draw();
     dynBezierCurve.move();
+    dynBezierCurve.interact(blobs);
 }
 
 void keyPressed() {
