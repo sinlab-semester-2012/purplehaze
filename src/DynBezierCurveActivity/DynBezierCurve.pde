@@ -348,8 +348,8 @@ class DynBezierCurve {
                         direction.div(direction.mag());
                         
                         displacement = PVector.mult(direction, NEAREST_MOTION_ELLIPSE_RADIUS - distance);
-                        float xCenterTemp = xCenterTemp + displacement.x;
-                        float yCenterTemp = yCenterTemp + displacement.y;
+                        float xCenterTemp = xCenterOrig + displacement.x;
+                        float yCenterTemp = yCenterOrig + displacement.y;
                         pointsMotionParams[index][4] = xCenterTemp;
                         pointsMotionParams[index][5] = yCenterTemp;
                     }
