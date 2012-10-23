@@ -327,7 +327,6 @@ class DynBezierCurve {
             int[] nearestMotionEllipsesIndices = null;
             int indexPt, indexCtrlPt1, indexCtrlPt2;
             PVector blobCenter = new PVector();
-            PVector motionEllipseCenter = new PVector();
             PVector centerOrigPt = new PVector();
             PVector centerOrigCtrlPt1 = new PVector();
             PVector centerOrigCtrlPt2 = new PVector();
@@ -350,10 +349,9 @@ class DynBezierCurve {
                         centerOrigCtrlPt1.set(ctrlPointsMotionParams[indexCtrlPt1][2], ctrlPointsMotionParams[indexCtrlPt1][3], 0);
                         centerOrigCtrlPt2.set(ctrlPointsMotionParams[indexCtrlPt2][2], ctrlPointsMotionParams[indexCtrlPt2][3], 0);
                         
-                        motionEllipseCenter = centerOrigPt;
-                        
-                        distance = (PVector.sub(motionEllipseCenter, blobCenter)).mag();
-                        direction = PVector.sub(motionEllipseCenter, blobCenter);
+                        PVector v = new PVector(points[indexPt].x, points[indexPt].y, 0);
+                        distance = (PVector.sub(centerOrigPt, blobCenter)).mag();
+                        direction = PVector.sub(v, blobCenter);
                         direction.div(direction.mag());
                         displacement = PVector.mult(direction, NEAREST_MOTION_ELLIPSE_RADIUS - distance);
                         
