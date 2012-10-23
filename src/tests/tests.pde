@@ -36,7 +36,7 @@ void setup() {
 }
 
 void draw() {
-  if (cam.available()) {
+    if (cam.available()) {
         cam.read();
         opencv.copy(cam.get());
         
@@ -57,7 +57,7 @@ void draw() {
         opencv.drawRectBlobs(blobs, opencv.width(), opencv.height(), 1);
         opencv.drawBlobs(blobs, opencv.width(), opencv.height(), 1 );
         opencv.drawCentroidBlobs(blobs, opencv.width(), opencv.height(), 1);
-    }    
+    }
     
     drawDynEli();
     //drawMouseDynEli();

@@ -323,8 +323,8 @@ class DynBezierCurve {
     
     // make curve interact with detected blobs
     void interact(Blob[] blobs) {
-        //if (blobs != null && blobs.length > 0) {
-            int[] nearestMotionEllipsesIndices = null;
+        if (blobs != null && blobs.length > 0) {
+            int[] nearestMotionCentersPointsIndices = null;
             int indexPt, indexCtrlPt1, indexCtrlPt2;
             PVector blobCenter = new PVector();
             PVector pt = new PVector();
@@ -335,14 +335,14 @@ class DynBezierCurve {
             PVector direction, displacement;
             float distance;
             
-            //for (int i = 0; i < blobs.length; i++) {
-                blobCenter.set(mouseX/*blobs[i].centroid.x*/, mouseY/*blobs[i].centroid.y*/, 0);
+            for (int i = 0; i < blobs.length; i++) {
+                blobCenter.set(blobs[i].centroid.x, blobs[i].centroid.y, 0);
                 
-                nearestMotionEllipsesIndices = getNearestMotionEllipsesIndices(blobCenter);
+                nearestMotionCentersPointsIndices = getNearestMotionCentersPointsIndices(blobCenter);
                 
-                if (nearestMotionEllipsesIndices != null && nearestMotionEllipsesIndices.length > 0) {
-                    for (int k = 0; k < nearestMotionEllipsesIndices.length; k++) {
-                        indexPt = nearestMotionEllipsesIndices[k];
+                if (nearestMotionCentersPointsIndices != null && nearestMotionCentersPointsIndices.length > 0) {
+                    for (int k = 0; k < nearestMotionCentersPointsIndices.length; k++) {
+                        indexPt = nearestMotionCentersPointsIndices[k];
                         indexCtrlPt1 = indexPt*2 - 1;
                         indexCtrlPt2 = indexPt*2;
                         
@@ -368,37 +368,37 @@ class DynBezierCurve {
                         ctrlPointsMotionParams[indexCtrlPt2][5] = centerTempCtrlPt2.y;
                     }
                 }
-            //}
-        //}
+            }
+        }
     }
     
-    // get array of indices of nearest motion ellipse centers to particular point 
-    // (excluding first and last points)
-    int[] getNearestMotionEllipsesIndices(PVector pt) {
-        int[] nearestMtnEllIdcs = null;
+    // get array of indices of position points having their motion ellipse centers
+    // near particular point pt (excluding first and last points)
+    int[] getNearestMotionCentersPointsIndices(PVector pt) {
+        int[] nearestMtnCenterPtsIdcs = null;
         int[] tmpIdcs = new int[nbPoints];
-        PVector mtnEllCenter = new PVector();
+        PVector mtnCenter = new PVector();
         float distance;
         
         int count = 0;
         for (int i = 1; i < nbPoints - 1; i++) {
             float xCenterOrig = pointsMotionParams[i][2];
             float yCenterOrig = pointsMotionParams[i][3];
-            mtnEllCenter.set(xCenterOrig, yCenterOrig, 0);
+            mtnCenter.set(xCenterOrig, yCenterOrig, 0);
             
-            distance = (PVector.sub(mtnEllCenter, pt)).mag();
+            distance = (PVector.sub(mtnCenter, pt)).mag();
             if (distance <= NEAREST_MOTION_ELLIPSE_RADIUS) {
                 tmpIdcs[count] = i;
                 count++;
             }
         }
         if (count > 0) {
-            nearestMtnEllIdcs = new int[count];
+            nearestMtnCenterPtsIdcs = new int[count];
             for (int k = 0; k < count; k++) {
-                nearestMtnEllIdcs[k] = tmpIdcs[k];
+                nearestMtnCenterPtsIdcs[k] = tmpIdcs[k];
             }
         }
-        return nearestMtnEllIdcs;
+        return nearestMtnCenterPtsIdcs;
     }
     
     // draw Bezier curve on screen
