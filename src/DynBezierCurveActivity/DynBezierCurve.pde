@@ -324,12 +324,16 @@ class DynBezierCurve {
     // make curve interact with detected blobs
     void interact(Blob[] blobs) {
         //if (blobs != null && blobs.length > 0) {
-            PVector blobCenter = new PVector();
             int[] nearestMotionEllipsesIndices = null;
-            int index;
+            int indexPt, indexCtrlPt1, indexCtrlPt2;
+            PVector blobCenter = new PVector();
             PVector motionEllipseCenter = new PVector();
-            float distance;
+            PVector centerOrigPt = new PVector();
+            PVector centerOrigCtrlPt1 = new PVector();
+            PVector centerOrigCtrlPt2 = new PVector();
+            PVector centerTempPt, centerTempCtrlPt1, centerTempCtrlPt2;
             PVector direction, displacement;
+            float distance;
             
             //for (int i = 0; i < blobs.length; i++) {
                 blobCenter.set(mouseX/*blobs[i].centroid.x*/, mouseY/*blobs[i].centroid.y*/, 0);
@@ -338,20 +342,31 @@ class DynBezierCurve {
                 
                 if (nearestMotionEllipsesIndices != null && nearestMotionEllipsesIndices.length > 0) {
                     for (int k = 0; k < nearestMotionEllipsesIndices.length; k++) {
-                        index = nearestMotionEllipsesIndices[k];
-                        float xCenterOrig = pointsMotionParams[index][2];
-                        float yCenterOrig = pointsMotionParams[index][3];
-                        motionEllipseCenter.set(xCenterOrig, yCenterOrig, 0);
+                        indexPt = nearestMotionEllipsesIndices[k];
+                        indexCtrlPt1 = indexPt*2 - 1;
+                        indexCtrlPt2 = indexPt*2;
+                        
+                        centerOrigPt.set(pointsMotionParams[indexPt][2], pointsMotionParams[indexPt][3], 0);
+                        centerOrigCtrlPt1.set(ctrlPointsMotionParams[indexCtrlPt1][2], ctrlPointsMotionParams[indexCtrlPt1][3], 0);
+                        centerOrigCtrlPt2.set(ctrlPointsMotionParams[indexCtrlPt2][2], ctrlPointsMotionParams[indexCtrlPt2][3], 0);
+                        
+                        motionEllipseCenter = centerOrigPt;
                         
                         distance = (PVector.sub(motionEllipseCenter, blobCenter)).mag();
                         direction = PVector.sub(motionEllipseCenter, blobCenter);
                         direction.div(direction.mag());
-                        
                         displacement = PVector.mult(direction, NEAREST_MOTION_ELLIPSE_RADIUS - distance);
-                        float xCenterTemp = xCenterOrig + displacement.x;
-                        float yCenterTemp = yCenterOrig + displacement.y;
-                        pointsMotionParams[index][4] = xCenterTemp;
-                        pointsMotionParams[index][5] = yCenterTemp;
+                        
+                        centerTempPt = PVector.add(centerOrigPt, displacement);
+                        centerTempCtrlPt1 = PVector.add(centerOrigCtrlPt1, displacement);
+                        centerTempCtrlPt2 = PVector.add(centerOrigCtrlPt2, displacement);
+                        
+                        pointsMotionParams[indexPt][4] = centerTempPt.x;
+                        pointsMotionParams[indexPt][5] = centerTempPt.y;
+                        ctrlPointsMotionParams[indexCtrlPt1][4] = centerTempCtrlPt1.x;
+                        ctrlPointsMotionParams[indexCtrlPt1][5] = centerTempCtrlPt1.y;
+                        ctrlPointsMotionParams[indexCtrlPt2][4] = centerTempCtrlPt2.x;
+                        ctrlPointsMotionParams[indexCtrlPt2][5] = centerTempCtrlPt2.y;
                     }
                 }
             //}

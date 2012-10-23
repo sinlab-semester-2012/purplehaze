@@ -11,6 +11,7 @@ DynBezierCurve dynBezierCurve;
 void setup() {
     size(640, 480);
     background(0);
+    smooth();
     
     dynBezierCurve = new DynBezierCurve(2);
 }
