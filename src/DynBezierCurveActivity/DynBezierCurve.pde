@@ -10,10 +10,10 @@ class DynBezierCurve {
     final int NB_MOTION_PARAMS = 7;
     final float POINT_MOTION_ELLIPSE_MIN_RADIUS = 0;
     final float POINT_MOTION_ELLIPSE_MAX_RADIUS = 0.025*(width + height);
-    final float POINT_ANGLE_INCREMENT = 0.05;
+    final float POINT_ANGLE_INCREMENT = 0.1;
     final float CTRL_POINT_MOTION_ELLIPSE_MIN_RADIUS = 0;
     final float CTRL_POINT_MOTION_ELLIPSE_MAX_RADIUS = 0.075*(width + height);
-    final float CTRL_POINT_ANGLE_INCREMENT = 0.03;
+    final float CTRL_POINT_ANGLE_INCREMENT = 0.05;
     
     final float NEAREST_MOTION_ELLIPSE_RADIUS = 0.075*(width + height);
     
@@ -336,7 +336,8 @@ class DynBezierCurve {
             float distance;
             
             for (int i = 0; i < blobs.length; i++) {
-                blobCenter.set(blobs[i].centroid.x, blobs[i].centroid.y, 0);
+                //blobCenter.set(blobs[i].centroid.x, blobs[i].centroid.y, 0);
+                blobCenter.set(mouseX, mouseY, 0);
                 
                 nearestMotionCentersPointsIndices = getNearestMotionCentersPointsIndices(blobCenter);
                 

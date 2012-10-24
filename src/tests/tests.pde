@@ -90,8 +90,3 @@ void keyPressed() {
     }
 }
 
-public void stop() {
-    cam.delete();
-    super.stop();
-}
-

@@ -25,7 +25,7 @@ Tuesday, October 16th, 2012:
 
 Tuesday, October 23rd, 2012:
 - finally got OpenCV working, having every correct version for each software helps
-(Processing 1.5-1, OpenCV 2.3.1, javacvPro 0.5, GSVideo 1.0)
+(Processing 1.5.1, OpenCV 2.3.1, javacvPro 0.5, GSVideo 1.0)
 - Blob detection working, simple method (absdiff with ref image and threshold)
 - Flowing Bezier Wall working, as well as interaction with said blobs
 (position points of curve avoid arriving blobs centroids)
