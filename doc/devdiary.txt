@@ -28,6 +28,7 @@ Tuesday, October 23rd, 2012:
 - Blob detection working, simple method (absdiff with ref image and threshold)
 - Flowing Bezier Wall working, as well as interaction with said blobs
 (position points of curve avoid arriving blobs centroids)
+- (Alex absent)
 
 Tuesday, October 30th, 2012:
 - 
