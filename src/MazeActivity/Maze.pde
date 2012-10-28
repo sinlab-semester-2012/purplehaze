@@ -35,8 +35,8 @@ class Maze {
         Integer[] currentCell = new Integer[2];
         Integer[] neighbourCell = new Integer[2];
         Boolean[][] visitedCells = new Boolean[nbCellsX][nbCellsY];
-        for (int x = 0; x < visitedCells.length; x++) {
-            for (int y = 0; y < visitedCells[0].length; y++) {
+        for (int x = 0; x < nbCellsX; x++) {
+            for (int y = 0; y < nbCellsY; y++) {
                 visitedCells[x][y] = false;
             }
         }
@@ -121,7 +121,13 @@ class Maze {
                 return (!visitedCells[x - 1][y] || !visitedCells[x][y + 1] || !visitedCells[x][y - 1]);
             }
         } else {
-            return (!visitedCells[x + 1][y] || !visitedCells[x - 1][y] || !visitedCells[x][y + 1] || !visitedCells[x][y - 1]);
+            if (y == 0) {
+                return (!visitedCells[x + 1][y] || !visitedCells[x - 1][y] || !visitedCells[x][y + 1]);
+            } else if (y == nbCellsY - 1) {
+                return (!visitedCells[x + 1][y] || !visitedCells[x - 1][y] || !visitedCells[x][y - 1]);
+            } else {
+                return (!visitedCells[x + 1][y] || !visitedCells[x - 1][y] || !visitedCells[x][y + 1] || !visitedCells[x][y - 1]);
+            }
         }
     }
     
@@ -137,39 +143,39 @@ class Maze {
             if (y == 0) {
                 if (!visitedCells[x + 1][y]) {
                    unvisitedNeighbourCells[count][0] = x + 1;
-                   unvisitedNeighbourCells[count][0] = y;
+                   unvisitedNeighbourCells[count][1] = y;
                    count++;
                 } 
                 if (!visitedCells[x][y + 1]) {
                    unvisitedNeighbourCells[count][0] = x;
-                   unvisitedNeighbourCells[count][0] = y + 1;
+                   unvisitedNeighbourCells[count][1] = y + 1;
                    count++;
                 }
             } else if (y == nbCellsY - 1) {
                 if (!visitedCells[x + 1][y]) {
                    unvisitedNeighbourCells[count][0] = x + 1;
-                   unvisitedNeighbourCells[count][0] = y;
+                   unvisitedNeighbourCells[count][1] = y;
                    count++;
                 } 
                 if (!visitedCells[x][y - 1]) {
                    unvisitedNeighbourCells[count][0] = x;
-                   unvisitedNeighbourCells[count][0] = y - 1;
+                   unvisitedNeighbourCells[count][1] = y - 1;
                    count++;
                 }
             } else {
                 if (!visitedCells[x + 1][y]) {
                    unvisitedNeighbourCells[count][0] = x + 1;
-                   unvisitedNeighbourCells[count][0] = y;
+                   unvisitedNeighbourCells[count][1] = y;
                    count++;
                 } 
                 if (!visitedCells[x][y + 1]) {
                    unvisitedNeighbourCells[count][0] = x;
-                   unvisitedNeighbourCells[count][0] = y + 1;
+                   unvisitedNeighbourCells[count][1] = y + 1;
                    count++;
                 }
                 if (!visitedCells[x][y - 1]) {
                    unvisitedNeighbourCells[count][0] = x;
-                   unvisitedNeighbourCells[count][0] = y - 1;
+                   unvisitedNeighbourCells[count][1] = y - 1;
                    count++;
                 }
             }
@@ -177,62 +183,96 @@ class Maze {
             if (y == 0) {
                 if (!visitedCells[x - 1][y]) {
                    unvisitedNeighbourCells[count][0] = x - 1;
-                   unvisitedNeighbourCells[count][0] = y;
+                   unvisitedNeighbourCells[count][1] = y;
                    count++;
                 } 
                 if (!visitedCells[x][y + 1]) {
                    unvisitedNeighbourCells[count][0] = x;
-                   unvisitedNeighbourCells[count][0] = y + 1;
+                   unvisitedNeighbourCells[count][1] = y + 1;
                    count++;
                 }
             } else if (y == nbCellsY - 1) {
                 if (!visitedCells[x - 1][y]) {
                    unvisitedNeighbourCells[count][0] = x - 1;
-                   unvisitedNeighbourCells[count][0] = y;
+                   unvisitedNeighbourCells[count][1] = y;
                    count++;
                 } 
                 if (!visitedCells[x][y - 1]) {
                    unvisitedNeighbourCells[count][0] = x;
-                   unvisitedNeighbourCells[count][0] = y - 1;
+                   unvisitedNeighbourCells[count][1] = y - 1;
                    count++;
                 }
             } else {
                 if (!visitedCells[x - 1][y]) {
                    unvisitedNeighbourCells[count][0] = x - 1;
-                   unvisitedNeighbourCells[count][0] = y;
+                   unvisitedNeighbourCells[count][1] = y;
                    count++;
                 } 
                 if (!visitedCells[x][y + 1]) {
                    unvisitedNeighbourCells[count][0] = x;
-                   unvisitedNeighbourCells[count][0] = y + 1;
+                   unvisitedNeighbourCells[count][1] = y + 1;
                    count++;
                 }
                 if (!visitedCells[x][y - 1]) {
                    unvisitedNeighbourCells[count][0] = x;
-                   unvisitedNeighbourCells[count][0] = y - 1;
+                   unvisitedNeighbourCells[count][1] = y - 1;
                    count++;
                 }
             }
         } else {
-            if (!visitedCells[x + 1][y]) {
-               unvisitedNeighbourCells[count][0] = x + 1;
-               unvisitedNeighbourCells[count][0] = y;
-               count++;
-            } 
-            if (!visitedCells[x - 1][y]) {
-               unvisitedNeighbourCells[count][0] = x - 1;
-               unvisitedNeighbourCells[count][0] = y;
-               count++;
-            } 
-            if (!visitedCells[x][y + 1]) {
-               unvisitedNeighbourCells[count][0] = x;
-               unvisitedNeighbourCells[count][0] = y + 1;
-               count++;
-            }
-            if (!visitedCells[x][y - 1]) {
-               unvisitedNeighbourCells[count][0] = x;
-               unvisitedNeighbourCells[count][0] = y - 1;
-               count++;
+            if (y == 0) {
+                if (!visitedCells[x + 1][y]) {
+                   unvisitedNeighbourCells[count][0] = x + 1;
+                   unvisitedNeighbourCells[count][1] = y;
+                   count++;
+                } 
+                if (!visitedCells[x - 1][y]) {
+                   unvisitedNeighbourCells[count][0] = x - 1;
+                   unvisitedNeighbourCells[count][1] = y;
+                   count++;
+                } 
+                if (!visitedCells[x][y + 1]) {
+                   unvisitedNeighbourCells[count][0] = x;
+                   unvisitedNeighbourCells[count][1] = y + 1;
+                   count++;
+                }
+            } else if (y == nbCellsY - 1) {
+                if (!visitedCells[x + 1][y]) {
+                   unvisitedNeighbourCells[count][0] = x + 1;
+                   unvisitedNeighbourCells[count][1] = y;
+                   count++;
+                } 
+                if (!visitedCells[x - 1][y]) {
+                   unvisitedNeighbourCells[count][0] = x - 1;
+                   unvisitedNeighbourCells[count][1] = y;
+                   count++;
+                } 
+                if (!visitedCells[x][y - 1]) {
+                   unvisitedNeighbourCells[count][0] = x;
+                   unvisitedNeighbourCells[count][1] = y - 1;
+                   count++;
+                }
+            } else {
+                if (!visitedCells[x + 1][y]) {
+                   unvisitedNeighbourCells[count][0] = x + 1;
+                   unvisitedNeighbourCells[count][1] = y;
+                   count++;
+                } 
+                if (!visitedCells[x - 1][y]) {
+                   unvisitedNeighbourCells[count][0] = x - 1;
+                   unvisitedNeighbourCells[count][1] = y;
+                   count++;
+                } 
+                if (!visitedCells[x][y + 1]) {
+                   unvisitedNeighbourCells[count][0] = x;
+                   unvisitedNeighbourCells[count][1] = y + 1;
+                   count++;
+                }
+                if (!visitedCells[x][y - 1]) {
+                   unvisitedNeighbourCells[count][0] = x;
+                   unvisitedNeighbourCells[count][1] = y - 1;
+                   count++;
+                }
             }
         }
         
