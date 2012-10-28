@@ -5,6 +5,7 @@ Interactive Walls: Dynamic Light Projection through Fog
 by Michael Chablais
 
 
+
 Description
 ===========
 
@@ -25,6 +26,7 @@ dynamic Bézier curve (collaborative task), a playful maze escape (individual
 task), and a lighthearted fight based on halos of light (confrontative task).
 
 
+
 Contents
 ========
 
@@ -32,6 +34,7 @@ Contents
 - src: application code
 
 See the Wiki page for more details about the code.
+
 
 
 Setup and Dependencies
@@ -43,13 +46,13 @@ Setup and Dependencies
 - GSVideo (http://gsvideo.sourceforge.net/)
 
 
+
 Instructions
 ============
 
 Each activity has a dedicated folder. In each folder, you will find the main 
 Processing sketch to run (the one with the same name as the folder) and 
 additional useful source files.
-
 
 DynBezierCurveActivity
 ----------------
@@ -69,6 +72,7 @@ Keyboard controls:
 - * = toggles fixation of the first and last position points
 
 
+
 Development Status
 ==================
 
@@ -83,7 +87,7 @@ To Do / Issues
 - Refine third idea (halos interaction).
 - Define clear goals for the end.
 
-Previous protyping steps
+Previous Protyping Steps
 ------------------------
 
 Week 1:
