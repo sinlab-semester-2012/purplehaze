@@ -42,17 +42,23 @@ class Maze {
         }
         Deque<Integer[]> cellStack = new ArrayDeque<Integer[]>();
         
+        // 1. make initial cell the current cell and mark it as visited
         currentCell[0] = 0;
         currentCell[1] = 0;
+        visitedCells[currentCell[0]][currentCell[1]] = true;
         
+        // 2. while there are unvisited cells
         while (generateExistsUnvisited(visitedCells)) {
-            if (generateHasUnvisitedNeighbours(currentCell)) {
-                neighbourCell = generatePickUnvisitedNeighbour(currentCell);
+            // a. if current cell has any neighbours which have not been visited 
+            if (generateHasUnvisitedNeighbours(visitedCells, currentCell)) {
+                // i. choose randomly one of the unvisited neighbours
+                neighbourCell = generatePickUnvisitedNeighbour(visitedCells, currentCell);
+                // ii. push current cell to stack
                 cellStack.push(currentCell);
-                
+                // iii. remove wall between current cell and chosen cell
                 boolean verticWall = (currentCell[0] != neighbourCell[0] && currentCell[1] == neighbourCell[1]);
                 boolean horizWall = (currentCell[1] != neighbourCell[1] && currentCell[0] == neighbourCell[0]);
-                int wallStartX, wallStartY, wallEndX, wallEndY;
+                int wallStartX = 0, wallStartY = 0, wallEndX = 0, wallEndY = 0;
                 if (verticWall) {
                     wallStartX = max(currentCell[0], neighbourCell[0]);
                     wallStartY = currentCell[1];
@@ -64,28 +70,198 @@ class Maze {
                     wallEndX = wallStartX + 1;
                     wallEndY = wallStartY;
                 }
-                
+                walls[wallStartX][wallStartY] = false;
+                walls[wallEndX][wallEndY] = false;
+                // iv. make chosen cell the current cell and mark it as visited
                 currentCell = neighbourCell;
-                visitedCells(currentCell[0], currentCell[1]) = true;
+                visitedCells[currentCell[0]][currentCell[1]] = true;
+            // b. else if stack is not empty 
             } else if (!cellStack.isEmpty()) {
+                // i. pop cell from the stack, make it the current cell
                 currentCell = cellStack.pop();
+            // c. else
             } else {
-                currentCell = generatePickRandomUnvisited();
-                visitedCells(currentCell[0], currentCell[1]) = true;
+                // i. pick random cell, make it the current cell and mark it as visited
+                currentCell = generatePickRandomUnvisited(visitedCells);
+                visitedCells[currentCell[0]][currentCell[1]] = true;
             }
         }
     }
     
-    // used only in generate(): check if there are unvisited cells
-    void generateExistsUnvisited(Boolean[][] visitedCells) {
-        for (int x = 0; x < visitedCells.length; x++) {
-            for (int y = 0; y < visitedCells[0].length; y++) {
+    // used only in generate(): check whether there are unvisited cells
+    boolean generateExistsUnvisited(Boolean[][] visitedCells) {
+        for (int x = 0; x < nbCellsX; x++) {
+            for (int y = 0; y < nbCellsY; y++) {
                 if (!visitedCells[x][y]) {
                     return true;
                 }
             }
         }
         return false;
+    }
+    
+    // used only in generate(): check whether cell has unvisited neighbours
+    boolean generateHasUnvisitedNeighbours(Boolean[][] visitedCells, Integer[] cell) {
+        int x = cell[0];
+        int y = cell[1];
+        if (x == 0) {
+            if (y == 0) {
+                return (!visitedCells[x + 1][y] || !visitedCells[x][y + 1]);
+            } else if (y == nbCellsY - 1) {
+                return (!visitedCells[x + 1][y] || !visitedCells[x][y - 1]);
+            } else {
+                return (!visitedCells[x + 1][y] || !visitedCells[x][y + 1] || !visitedCells[x][y - 1]);
+            }
+        } else if (x == nbCellsX - 1) {
+            if (y == 0) {
+                return (!visitedCells[x - 1][y] || !visitedCells[x][y + 1]);
+            } else if (y == nbCellsY - 1) {
+                return (!visitedCells[x - 1][y] || !visitedCells[x][y - 1]);
+            } else {
+                return (!visitedCells[x - 1][y] || !visitedCells[x][y + 1] || !visitedCells[x][y - 1]);
+            }
+        } else {
+            return (!visitedCells[x + 1][y] || !visitedCells[x - 1][y] || !visitedCells[x][y + 1] || !visitedCells[x][y - 1]);
+        }
+    }
+    
+    // used only in generate(): pick random unvisited neighbour from cell
+    Integer[] generatePickUnvisitedNeighbour(Boolean[][] visitedCells, Integer[] cell) {
+        Integer[][] unvisitedNeighbourCells = new Integer[4][2];
+        int count = 0;
+        Integer[] neighbourCell = new Integer[2];
+        
+        int x = cell[0];
+        int y = cell[1];
+        if (x == 0) {
+            if (y == 0) {
+                if (!visitedCells[x + 1][y]) {
+                   unvisitedNeighbourCells[count][0] = x + 1;
+                   unvisitedNeighbourCells[count][0] = y;
+                   count++;
+                } 
+                if (!visitedCells[x][y + 1]) {
+                   unvisitedNeighbourCells[count][0] = x;
+                   unvisitedNeighbourCells[count][0] = y + 1;
+                   count++;
+                }
+            } else if (y == nbCellsY - 1) {
+                if (!visitedCells[x + 1][y]) {
+                   unvisitedNeighbourCells[count][0] = x + 1;
+                   unvisitedNeighbourCells[count][0] = y;
+                   count++;
+                } 
+                if (!visitedCells[x][y - 1]) {
+                   unvisitedNeighbourCells[count][0] = x;
+                   unvisitedNeighbourCells[count][0] = y - 1;
+                   count++;
+                }
+            } else {
+                if (!visitedCells[x + 1][y]) {
+                   unvisitedNeighbourCells[count][0] = x + 1;
+                   unvisitedNeighbourCells[count][0] = y;
+                   count++;
+                } 
+                if (!visitedCells[x][y + 1]) {
+                   unvisitedNeighbourCells[count][0] = x;
+                   unvisitedNeighbourCells[count][0] = y + 1;
+                   count++;
+                }
+                if (!visitedCells[x][y - 1]) {
+                   unvisitedNeighbourCells[count][0] = x;
+                   unvisitedNeighbourCells[count][0] = y - 1;
+                   count++;
+                }
+            }
+        } else if (x == nbCellsX - 1) {
+            if (y == 0) {
+                if (!visitedCells[x - 1][y]) {
+                   unvisitedNeighbourCells[count][0] = x - 1;
+                   unvisitedNeighbourCells[count][0] = y;
+                   count++;
+                } 
+                if (!visitedCells[x][y + 1]) {
+                   unvisitedNeighbourCells[count][0] = x;
+                   unvisitedNeighbourCells[count][0] = y + 1;
+                   count++;
+                }
+            } else if (y == nbCellsY - 1) {
+                if (!visitedCells[x - 1][y]) {
+                   unvisitedNeighbourCells[count][0] = x - 1;
+                   unvisitedNeighbourCells[count][0] = y;
+                   count++;
+                } 
+                if (!visitedCells[x][y - 1]) {
+                   unvisitedNeighbourCells[count][0] = x;
+                   unvisitedNeighbourCells[count][0] = y - 1;
+                   count++;
+                }
+            } else {
+                if (!visitedCells[x - 1][y]) {
+                   unvisitedNeighbourCells[count][0] = x - 1;
+                   unvisitedNeighbourCells[count][0] = y;
+                   count++;
+                } 
+                if (!visitedCells[x][y + 1]) {
+                   unvisitedNeighbourCells[count][0] = x;
+                   unvisitedNeighbourCells[count][0] = y + 1;
+                   count++;
+                }
+                if (!visitedCells[x][y - 1]) {
+                   unvisitedNeighbourCells[count][0] = x;
+                   unvisitedNeighbourCells[count][0] = y - 1;
+                   count++;
+                }
+            }
+        } else {
+            if (!visitedCells[x + 1][y]) {
+               unvisitedNeighbourCells[count][0] = x + 1;
+               unvisitedNeighbourCells[count][0] = y;
+               count++;
+            } 
+            if (!visitedCells[x - 1][y]) {
+               unvisitedNeighbourCells[count][0] = x - 1;
+               unvisitedNeighbourCells[count][0] = y;
+               count++;
+            } 
+            if (!visitedCells[x][y + 1]) {
+               unvisitedNeighbourCells[count][0] = x;
+               unvisitedNeighbourCells[count][0] = y + 1;
+               count++;
+            }
+            if (!visitedCells[x][y - 1]) {
+               unvisitedNeighbourCells[count][0] = x;
+               unvisitedNeighbourCells[count][0] = y - 1;
+               count++;
+            }
+        }
+        
+        int r = floor(random(0, count));
+        neighbourCell[0] = unvisitedNeighbourCells[r][0];
+        neighbourCell[1] = unvisitedNeighbourCells[r][1];
+        return neighbourCell;
+    }
+    
+    // used only in generate(): pick random unvisited cell
+    Integer[] generatePickRandomUnvisited(Boolean[][] visitedCells) {
+        Integer[][] unvisitedCells = new Integer[nbCellsX*nbCellsY][2];
+        Integer[] unvisitedCell = new Integer[2];
+        int count = 0;
+        
+        for (int x = 0; x < nbCellsX; x++) {
+            for (int y = 0; y < nbCellsY; y++) {
+                if (!visitedCells[x][y]) {
+                    unvisitedCells[count][0] = x;
+                    unvisitedCells[count][1] = y;
+                    count++;
+                }
+            }
+        }
+        
+        int r = floor(random(0, count));
+        unvisitedCell[0] = unvisitedCells[r][0];
+        unvisitedCell[1] = unvisitedCells[r][1];
+        return unvisitedCell;
     }
     
     // draw maze and maze objects
