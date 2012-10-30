@@ -336,8 +336,8 @@ class DynBezierCurve {
             float distance;
             
             for (int i = 0; i < blobs.length; i++) {
-                //blobCenter.set(blobs[i].centroid.x, blobs[i].centroid.y, 0);
-                blobCenter.set(mouseX, mouseY, 0);
+                blobCenter.set(blobs[i].centroid.x, blobs[i].centroid.y, 0);
+                //blobCenter.set(mouseX, mouseY, 0);
                 
                 nearestMotionCentersPointsIndices = getNearestMotionCentersPointsIndices(blobCenter);
                 

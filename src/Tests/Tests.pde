@@ -47,7 +47,7 @@ void draw() {
         opencv.threshold(opencv.Memory2, 0.2, "BINARY");
         image(opencv.getMemory2(), widthCapture, heightCapture);
         
-        blobs = opencv.blobs(opencv.Memory2, opencv.area()/16, opencv.area(), 10, false, 4096, false);
+        blobs = opencv.blobs(opencv.Memory2, opencv.area()/64, opencv.area(), 10, false, 4096, false);
         
         fill(0, 0, 255);
         stroke (0, 0, 255);

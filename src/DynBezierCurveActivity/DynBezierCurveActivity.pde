@@ -37,13 +37,13 @@ void draw() {
         opencv.absDiff();
         opencv.threshold(opencv.Memory2, 0.2, "BINARY");
         
-        blobs = opencv.blobs(opencv.Memory2, opencv.area()/16, opencv.area(), 10, false, 4096, false);
+        blobs = opencv.blobs(opencv.Memory2, opencv.area()/64, opencv.area(), 10, false, 4096, false);
         
         //rectMode(CORNER);
         //ellipseMode(CENTER);
         //opencv.drawRectBlobs(blobs, 0, 0, 1);
         //opencv.drawBlobs(blobs, 0, 0, 1 );
-        //opencv.drawCentroidBlobs(blobs, 0, 0, 1);
+        opencv.drawCentroidBlobs(blobs, 0, 0, 1);
     }
     
     dynBezierCurve.draw();
