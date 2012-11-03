@@ -82,49 +82,17 @@ class DynBezierCurve {
         }
     }
     
-    // randomly pick first and last points on two sides of screen
+    // randomly pick first and last points on two opposite sides of screen
     void genFirstLastPts() {
-        float r1 = random(0, 1);
-        float r2 = random(0, 1);
+        float r = random(0, 1);
         
-        if (0 <= r1 && r1 < 0.25) {
+        if (r < 0.5) {
             points[0].set(0, random(0, height), 0);
-            if (0 <= r2 && r2 < 0.33) {
-                points[nbPoints-1].set(random(0, width), height, 0);
-            } else if (0.33 <= r2 && r2 < 0.66) {
-                points[nbPoints-1].set(width, random(0, height), 0);
-            } else if (0.66 <= r2 && r2 < 1.0) {
-                points[nbPoints-1].set(random(0, width), 0, 0);
-            }
-        } else if (0.25 <= r1 && r1 < 0.5) {
-            points[0].set(random(0, width), height, 0);
-            if (0 <= r2 && r2 < 0.33) {
-                points[nbPoints-1].set(width, random(0, height), 0);
-            } else if (0.33 <= r2 && r2 < 0.66) {
-                points[nbPoints-1].set(random(0, width), 0, 0);
-            } else if (0.66 <= r2 && r2 < 1.0) {
-                points[nbPoints-1].set(0, random(0, height), 0);
-            }
-        } else if (0.5 <= r1 && r1 < 0.75) {
-            points[0].set(width, random(0, height), 0);
-            if (0 <= r2 && r2 < 0.33) {
-                points[nbPoints-1].set(random(0, width), 0, 0);
-            } else if (0.33 <= r2 && r2 < 0.66) {
-                points[nbPoints-1].set(0, random(0, height), 0);
-            } else if (0.66 <= r2 && r2 < 1.0) {
-                points[nbPoints-1].set(random(0, width), height, 0);
-            }
-        } else if (0.75 <= r1 && r1 < 1.0) {
+            points[nbPoints-1].set(width, random(0, height), 0);
+        } else {
             points[0].set(random(0, width), 0, 0);
-            if (0 <= r2 && r2 < 0.33) {
-                points[nbPoints-1].set(0, random(0, height), 0);
-            } else if (0.33 <= r2 && r2 < 0.66) {
-                points[nbPoints-1].set(random(0, width), height, 0);
-            } else if (0.66 <= r2 && r2 < 1.0) {
-                points[nbPoints-1].set(width, random(0, height), 0);
-            }
+            points[nbPoints-1].set(random(0, width), height, 0);
         }
-            
     }
     
     // generate middle points (distribute evenly and add some randomness)
