@@ -178,17 +178,25 @@ class DynBezierCurve {
     }
     
     // generate move parameters for position points
-    // (except for first and last points)
     void genPtsMotionParams() {
         float a, b, xCenterOrig, yCenterOrig, xCenterTemp, yCenterTemp, theta;
-        for (int i = 1; i < nbPoints - 1; i++) {
-            a = random(POINT_MOTION_ELLIPSE_MIN_RADIUS, POINT_MOTION_ELLIPSE_MAX_RADIUS);
-            b = random(POINT_MOTION_ELLIPSE_MIN_RADIUS, POINT_MOTION_ELLIPSE_MAX_RADIUS);
-            theta = random(0, TWO_PI);
-            xCenterOrig = points[i].x - a*cos(theta);
-            yCenterOrig = points[i].y - b*cos(theta);
+        for (int i = 0; i < nbPoints; i++) {
+            if (i == 0 || i == nbPoints - 1) {
+                a = 0;
+                b = 0;
+                theta = 0;
+                xCenterOrig = points[i].x;
+                yCenterOrig = points[i].y;
+            } else {
+                a = random(POINT_MOTION_ELLIPSE_MIN_RADIUS, POINT_MOTION_ELLIPSE_MAX_RADIUS);
+                b = random(POINT_MOTION_ELLIPSE_MIN_RADIUS, POINT_MOTION_ELLIPSE_MAX_RADIUS);
+                theta = random(0, TWO_PI);
+                xCenterOrig = points[i].x - a*cos(theta);
+                yCenterOrig = points[i].y - b*cos(theta);
+            }
             xCenterTemp = xCenterOrig;
             yCenterTemp = yCenterOrig;
+            
             pointsMotionParams[i][0] = a;
             pointsMotionParams[i][1] = b;
             pointsMotionParams[i][2] = xCenterOrig;
@@ -313,29 +321,31 @@ class DynBezierCurve {
                 if (nearestMotionCentersPointsIndices != null && nearestMotionCentersPointsIndices.length > 0) {
                     for (int k = 0; k < nearestMotionCentersPointsIndices.length; k++) {
                         indexPt = nearestMotionCentersPointsIndices[k];
-                        indexCtrlPt1 = indexPt*2 - 1;
-                        indexCtrlPt2 = indexPt*2;
-                        
-                        centerOrigPt.set(pointsMotionParams[indexPt][2], pointsMotionParams[indexPt][3], 0);
-                        centerOrigCtrlPt1.set(ctrlPointsMotionParams[indexCtrlPt1][2], ctrlPointsMotionParams[indexCtrlPt1][3], 0);
-                        centerOrigCtrlPt2.set(ctrlPointsMotionParams[indexCtrlPt2][2], ctrlPointsMotionParams[indexCtrlPt2][3], 0);
-                        
-                        pt.set(points[indexPt].x, points[indexPt].y, 0);
-                        distance = (PVector.sub(centerOrigPt, blobCenter)).mag();
-                        direction = PVector.sub(pt, blobCenter);
-                        direction.div(direction.mag());
-                        displacement = PVector.mult(direction, NEAREST_MOTION_ELLIPSE_RADIUS - distance);
-                        
-                        centerTempPt = PVector.add(centerOrigPt, displacement);
-                        centerTempCtrlPt1 = PVector.add(centerOrigCtrlPt1, displacement);
-                        centerTempCtrlPt2 = PVector.add(centerOrigCtrlPt2, displacement);
-                        
-                        pointsMotionParams[indexPt][4] = centerTempPt.x;
-                        pointsMotionParams[indexPt][5] = centerTempPt.y;
-                        ctrlPointsMotionParams[indexCtrlPt1][4] = centerTempCtrlPt1.x;
-                        ctrlPointsMotionParams[indexCtrlPt1][5] = centerTempCtrlPt1.y;
-                        ctrlPointsMotionParams[indexCtrlPt2][4] = centerTempCtrlPt2.x;
-                        ctrlPointsMotionParams[indexCtrlPt2][5] = centerTempCtrlPt2.y;
+                        if (indexPt != 0 && indexPt != nbPoints - 1) {
+                            indexCtrlPt1 = indexPt*2 - 1;
+                            indexCtrlPt2 = indexPt*2;
+                            
+                            centerOrigPt.set(pointsMotionParams[indexPt][2], pointsMotionParams[indexPt][3], 0);
+                            centerOrigCtrlPt1.set(ctrlPointsMotionParams[indexCtrlPt1][2], ctrlPointsMotionParams[indexCtrlPt1][3], 0);
+                            centerOrigCtrlPt2.set(ctrlPointsMotionParams[indexCtrlPt2][2], ctrlPointsMotionParams[indexCtrlPt2][3], 0);
+                            
+                            pt.set(points[indexPt].x, points[indexPt].y, 0);
+                            distance = (PVector.sub(centerOrigPt, blobCenter)).mag();
+                            direction = PVector.sub(pt, blobCenter);
+                            direction.div(direction.mag());
+                            displacement = PVector.mult(direction, NEAREST_MOTION_ELLIPSE_RADIUS - distance);
+                            
+                            centerTempPt = PVector.add(centerOrigPt, displacement);
+                            centerTempCtrlPt1 = PVector.add(centerOrigCtrlPt1, displacement);
+                            centerTempCtrlPt2 = PVector.add(centerOrigCtrlPt2, displacement);
+                            
+                            pointsMotionParams[indexPt][4] = centerTempPt.x;
+                            pointsMotionParams[indexPt][5] = centerTempPt.y;
+                            ctrlPointsMotionParams[indexCtrlPt1][4] = centerTempCtrlPt1.x;
+                            ctrlPointsMotionParams[indexCtrlPt1][5] = centerTempCtrlPt1.y;
+                            ctrlPointsMotionParams[indexCtrlPt2][4] = centerTempCtrlPt2.x;
+                            ctrlPointsMotionParams[indexCtrlPt2][5] = centerTempCtrlPt2.y;
+                        }
                     }
                 }
             }
@@ -343,7 +353,7 @@ class DynBezierCurve {
     }
     
     // get array of indices of position points having their motion ellipse centers
-    // near particular point pt (excluding first and last points)
+    // near particular point pt
     int[] getNearestMotionCentersPointsIndices(PVector pt) {
         int[] nearestMtnCenterPtsIdcs = null;
         int[] tmpIdcs = new int[nbPoints];
@@ -351,7 +361,7 @@ class DynBezierCurve {
         float distance;
         
         int count = 0;
-        for (int i = 1; i < nbPoints - 1; i++) {
+        for (int i = 0; i < nbPoints; i++) {
             float xCenterOrig = pointsMotionParams[i][2];
             float yCenterOrig = pointsMotionParams[i][3];
             mtnCenter.set(xCenterOrig, yCenterOrig, 0);
