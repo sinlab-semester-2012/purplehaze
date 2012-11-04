@@ -82,17 +82,15 @@ void keyPressed() {
         opencv.remember();
     } else if (key == ENTER || key == RETURN) {
         dynBezierCurve.reset();
-    } else if (key == '.') {
-        dynBezierCurve.toggleDebugDisplay();
     } else if (key == '-') {
         dynBezierCurve.decreaseNbPoints();
     } else if (key == '+') {
         dynBezierCurve.increaseNbPoints();
-    } else if (key == '*') {
-        dynBezierCurve.toggleFixedFirstLastPts();
-    } else if (key == 'y') {
+    } else if (key == '.') {
+        dynBezierCurve.toggleDebugDisplay();
+    } else if (key == '/') {
         toggleOpencvDebugDisplay();
-    } else if (key == 'x') {
+    } else if (key == '*') {
         toggleBlobDebugDisplay();
     }
 }

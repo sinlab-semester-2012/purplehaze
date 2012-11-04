@@ -26,21 +26,22 @@ class DynBezierCurve {
     float[][] pointsMotionParams;
     PVector[] ctrlPoints;
     float[][] ctrlPointsMotionParams;
-    boolean fixedFirstLastPts;
     boolean debugDisplay;
 
 
     DynBezierCurve(int nbP) {
         nbPoints = max(MIN_NB_POINTS, min(nbP, MAX_NB_POINTS));
         nbCtrlPoints = 2*nbPoints - 2;
-        fixedFirstLastPts = false;
-        initialize();
-        generate();
-        debugDisplay = true;
+        
+        boolean fixedFirstLastPts = false;
+        initialize(fixedFirstLastPts);
+        generate(fixedFirstLastPts);
+        
+        debugDisplay = false;
     }
     
     // initialize data
-    void initialize() {
+    void initialize(boolean fixedFirstLastPts) {
         PVector tmpFirst = new PVector();
         PVector tmpLast = new PVector();
         if (points != null && fixedFirstLastPts) {
@@ -66,14 +67,14 @@ class DynBezierCurve {
     }
     
     // create Bezier curve
-    void generate() {
-        genPts();
+    void generate(boolean fixedFirstLastPts) {
+        genPts(fixedFirstLastPts);
         genCtrlPts();
         genMotionParams();
     }
     
     // generate points (positions)
-    void genPts() {
+    void genPts(boolean fixedFirstLastPts) {
         if (!fixedFirstLastPts) {
             genFirstLastPts();
         }
@@ -400,14 +401,14 @@ class DynBezierCurve {
                 noStroke();
                 n = n + 2;
             }
-            textAlign(RIGHT);
-            if (fixedFirstLastPts) {
-                fill(0, 255, 0);
-                text("Fixed First and Last Points: ON", width - 10, height - 10);
-            } else {
-                fill(255, 0, 0);
-                text("Fixed First and Last Points: OFF", width - 10, height - 10);
-            }
+//            textAlign(RIGHT);
+//            if (fixedFirstLastPts) {
+//                fill(0, 255, 0);
+//                text("Fixed First and Last Points: ON", width - 10, height - 10);
+//            } else {
+//                fill(255, 0, 0);
+//                text("Fixed First and Last Points: OFF", width - 10, height - 10);
+//            }
         }
         
         // draw curve
@@ -428,12 +429,8 @@ class DynBezierCurve {
     
     // regenerate curve
     void reset() {
-        generate();
-    }
-    
-    // toggle graphical debug informations
-    void toggleDebugDisplay() {
-        debugDisplay = !debugDisplay;
+        boolean fixedFirstLastPts = false;
+        generate(fixedFirstLastPts);
     }
     
     // decrease number of position points
@@ -441,8 +438,10 @@ class DynBezierCurve {
         if (nbPoints > MIN_NB_POINTS) {
             nbPoints--;
             nbCtrlPoints = 2*nbPoints - 2;
-            initialize();
-            generate();
+            
+            boolean fixedFirstLastPts = true;
+            initialize(fixedFirstLastPts);
+            generate(fixedFirstLastPts);
         }
     }
     
@@ -451,14 +450,16 @@ class DynBezierCurve {
         if (nbPoints < MAX_NB_POINTS) {
             nbPoints++;
             nbCtrlPoints = 2*nbPoints - 2;
-            initialize();
-            generate();
+            
+            boolean fixedFirstLastPts = true;
+            initialize(fixedFirstLastPts);
+            generate(fixedFirstLastPts);
         }
     }
     
-    // toggle fixed positions of first and last points
-    void toggleFixedFirstLastPts() {
-        fixedFirstLastPts = !fixedFirstLastPts;
+    // toggle graphical debug informations
+    void toggleDebugDisplay() {
+        debugDisplay = !debugDisplay;
     }
 }
 

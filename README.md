@@ -66,10 +66,11 @@ Setup and run:
 Keyboard controls:
 - Space Bar = capture current frame as reference image for blob detection
 - Enter/Return Key = randomly generate another curve
-- . = toggles debugging display 
 - - = decrease the number of position points
 - + = increase the number of position points
-- * = toggles fixation of the first and last position points
+- . = toggles Bézier curve debugging display 
+- / = toggles OpenCV debugging display 
+- * = toggles blob detection debugging display 
 
 
 
