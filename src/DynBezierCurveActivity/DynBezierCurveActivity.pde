@@ -42,17 +42,25 @@ void draw() {
         opencv.blur();
         if (opencvDebugDisplay == 1) {
             image(opencv.image(), 0, 0);
+            fill(255, 255, 0);
+            text("blurred captured", 10, 20);
+        }
+        if (opencvDebugDisplay == 2) {
+            image(opencv.getMemory(), 0, 0);
+            fill(255, 255, 0);
+            text("reference", 10, 20);
         }
         opencv.absDiff();
-        if (opencvDebugDisplay == 2) {
-            image(opencv.getMemory2(), 0, 0);
-        }
         if (opencvDebugDisplay == 3) {
-            image(opencv.getMemory(), 0, 0);
+            image(opencv.getMemory2(), 0, 0);
+            fill(255, 255, 0);
+            text("abs diff", 10, 20);
         }
         opencv.threshold(opencv.Memory2, 0.2, "BINARY");
         if (opencvDebugDisplay == 4) {
             image(opencv.getMemory2(), 0, 0);
+            fill(255, 255, 0);
+            text("thresholded", 10, 20);
         }
         
         blobs = opencv.blobs(opencv.Memory2, opencv.area()/64, opencv.area(), 10, false, 4096, false);

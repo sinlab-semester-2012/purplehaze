@@ -401,14 +401,6 @@ class DynBezierCurve {
                 noStroke();
                 n = n + 2;
             }
-//            textAlign(RIGHT);
-//            if (fixedFirstLastPts) {
-//                fill(0, 255, 0);
-//                text("Fixed First and Last Points: ON", width - 10, height - 10);
-//            } else {
-//                fill(255, 0, 0);
-//                text("Fixed First and Last Points: OFF", width - 10, height - 10);
-//            }
         }
         
         // draw curve
