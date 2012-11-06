@@ -13,9 +13,10 @@ Master Semester Project, SINLAB/LDM, EPFL.
 
 The aim of this project is to experiment with the concept of walls and how 
 people act in their presence. Using technological advancements such as those 
-that are offered by Computer Science, how can we metaphorically transform and 
-reconstruct walls? By having dynamic walls that react to user presence, we try 
-to create a new type of interaction with architectural structures.
+that are offered by Computer Science, how can we literally as well as 
+metaphorically transform and reconstruct walls? By having dynamic walls that 
+react to user presence, we try to create a new type of interaction with 
+architectural structures.
 
 Projecting light through fog is one interesting way to play with the concept 
 of barriers and frontiers. Using a camera, a projector and theatrical fog, we 
@@ -77,13 +78,14 @@ Keyboard controls:
 Development Status
 ==================
 
-Week 7:
-- First version of dynamic Bézier curve/wall fully working (since Week 6).
+Week 8:
+- Mid-semester presentation
+- Working on enhancing interaction in Bézier curve activity.
 - Working on the second idea, the maze escape (currently on maze generation step).
 
 To Do / Issues
 --------------
-- Add more interaction to the Bézier wall. It is currently simply avoiding the user.
+- Add more interaction to the Bézier wall. Work in progress.
 - Continue working on the maze.
 - Refine third idea (halos interaction).
 - Define clear goals for the end.
@@ -113,5 +115,10 @@ points of curve avoid arriving blobs centroids).
 Week 6:
 - Finished first working version of the dynamic Bézier wall.
 
+Week 7:
+- First version of dynamic Bézier curve/wall fully working 
+- Additional refinements on dynamic Bézier curve/wall (adding debugging display,
+preparing for some refactoring, working on enhanced interaction)
+- Working on the second idea, the maze escape (currently on maze generation step).
 
 --------------------------------------------------------------------------------
