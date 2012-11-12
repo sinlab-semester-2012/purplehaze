@@ -17,11 +17,11 @@ void setup() {
     background(0);
     smooth();
     
-    /*frameRate(fpsCapture);
+    frameRate(fpsCapture);
     cam = new GSCapture(this, widthCapture, heightCapture, fpsCapture);
     cam.start();
     opencv = new OpenCV(this);
-    opencv.allocate(widthCapture, heightCapture);*/
+    opencv.allocate(widthCapture, heightCapture);
     
     maze = new Maze(8, 6);
 }
@@ -29,7 +29,7 @@ void setup() {
 void draw() {
     background(0);
     
-    /*if (cam.available()) {
+    if (cam.available()) {
         cam.read();
         opencv.copy(cam.get());
         
@@ -44,9 +44,12 @@ void draw() {
         //opencv.drawRectBlobs(blobs, 0, 0, 1);
         //opencv.drawBlobs(blobs, 0, 0, 1 );
         //opencv.drawCentroidBlobs(blobs, 0, 0, 1);
-    }*/
+    }
     
     maze.draw();
+    if (blobs != null && blobs.length > 0) {
+        maze.interact(blobs[0]);
+    }
 }
 
 void keyPressed() {

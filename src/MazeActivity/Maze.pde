@@ -9,6 +9,7 @@ class Maze {
     float sizeCellY;
     Cell[][] cells;
     
+    PVector playerPos;
     
     Maze(int nbCX, int nbCY) {
         nbCellsX = nbCX;
@@ -27,6 +28,7 @@ class Maze {
                 cells[x][y] = new Cell(x, y);
             }
         }
+        playerPos = new PVector();
     }
     
     // generate maze using backtracking depth-first search algorithm
@@ -83,6 +85,9 @@ class Maze {
                 visitedCellInds[currentCellInd[0]][currentCellInd[1]] = true;
             }
         }
+        
+        // 3. pick entry and exit of maze
+        generatePickEntryAndExit();
     }
     
     // used only in generate(): check whether there are unvisited cells
@@ -301,9 +306,52 @@ class Maze {
         return unvisitedCellInd;
     }
     
+    // used only in generate(): pick entry and exit cells
+    // (specific role will be determined when player enters maze by one of them)
+    void generatePickEntryAndExit() {
+        int r, x, y;
+        
+        for (int i = 0; i < 2; i++) {
+            do {
+                r = floor(random(0, 4));
+                if (r == 0) {
+                    x = 0;
+                    y = floor(random(0, nbCellsY));
+                } else if (r == 1) {
+                    x = nbCellsX - 1;
+                    y = floor(random(0, nbCellsY));
+                } else if (r == 2) {
+                    x = floor(random(0, nbCellsX));
+                    y = 0;
+                } else {
+                    x = floor(random(0, nbCellsX));
+                    y = nbCellsY - 1;
+                }
+            } while (cells[x][y].isEntryOrExit());
+            cells[x][y].setAsEntryOrExit();
+        }
+    }
+    
+    
+    // interact with detected blob (player)
+    void interact(Blob blob) {
+        //playerPos.set(blob.centroid.x, blob.centroid.y, 0);
+        playerPos.set(mouseX, mouseY, 0);
+    }
+    
+    Cell getPlayerCell() {
+        float xPos = playerPos.x;
+        float yPos = playerPos.y;
+        int x = floor((xPos - (xPos % sizeCellX))/sizeCellX);
+        int y = floor((yPos - (yPos % sizeCellY))/sizeCellY);
+        return cells[x][y];
+    }
+    
     // draw maze and maze objects
     void draw() {
-        drawWalls();
+        //drawWalls();
+        drawNearestWalls();
+        drawEntryAndExit();
     }
     
     // draw walls of maze
@@ -324,6 +372,52 @@ class Maze {
                 }
                 if (cells[x][y].hasBottomWall()) {
                     line(x*sizeCellX, (y + 1)*sizeCellY - 1, (x + 1)*sizeCellX - 1, (y + 1)*sizeCellY - 1);
+                }
+            }
+        }
+    }
+    
+    void drawNearestWalls() {
+        Cell cell = getPlayerCell();
+        int x = cell.getXIndex();
+        int y = cell.getYIndex();
+        
+        stroke(255);
+        strokeWeight(EDGE_WIDTH);
+        strokeCap(ROUND);
+        if (cells[x][y].hasRightWall()) {
+            line((x + 1)*sizeCellX - 1, y*sizeCellY, (x + 1)*sizeCellX - 1, (y + 1)*sizeCellY - 1);
+        }
+        if (cells[x][y].hasTopWall()) {
+            line(x*sizeCellX, y*sizeCellY, (x + 1)*sizeCellX - 1, y*sizeCellY);
+        }
+        if (cells[x][y].hasLeftWall()) {
+            line(x*sizeCellX, y*sizeCellY, x*sizeCellX, (y + 1)*sizeCellY - 1);
+        }
+        if (cells[x][y].hasBottomWall()) {
+            line(x*sizeCellX, (y + 1)*sizeCellY - 1, (x + 1)*sizeCellX - 1, (y + 1)*sizeCellY - 1);
+        }
+    }
+    
+    void drawEntryAndExit() {
+        stroke(0, 255, 0);
+        strokeWeight(EDGE_WIDTH);
+        strokeCap(ROUND);
+        for (int x = 0; x < nbCellsX; x++) {
+            for (int y = 0; y < nbCellsY; y++) {
+                if (cells[x][y].isEntryOrExit()) {
+                    if (cells[x][y].hasRightWall() && x == nbCellsX - 1) {
+                        line((x + 1)*sizeCellX - 1, y*sizeCellY, (x + 1)*sizeCellX - 1, (y + 1)*sizeCellY - 1);
+                    }
+                    if (cells[x][y].hasTopWall() && y == 0) {
+                        line(x*sizeCellX, y*sizeCellY, (x + 1)*sizeCellX - 1, y*sizeCellY);
+                    }
+                    if (cells[x][y].hasLeftWall() && x == 0) {
+                        line(x*sizeCellX, y*sizeCellY, x*sizeCellX, (y + 1)*sizeCellY - 1);
+                    }
+                    if (cells[x][y].hasBottomWall() && y == nbCellsY - 1) {
+                        line(x*sizeCellX, (y + 1)*sizeCellY - 1, (x + 1)*sizeCellX - 1, (y + 1)*sizeCellY - 1);
+                    }
                 }
             }
         }

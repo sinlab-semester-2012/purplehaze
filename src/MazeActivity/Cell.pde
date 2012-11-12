@@ -1,34 +1,48 @@
 
 class Cell {
     
-    int x;
-    int y;
+    int xIndex;
+    int yIndex;
     boolean rightWall;
     boolean topWall;
     boolean leftWall;
     boolean bottomWall;
+    boolean isEntry;
+    boolean isExit;
     
-    Cell(int xPos, int yPos) {
-        x = xPos;
-        y = yPos;
+    Cell(int xInd, int yInd) {
+        xIndex = xInd;
+        yIndex = yInd;
         rightWall = true;
         topWall = true;
         leftWall = true;
         bottomWall = true;
+        isEntry = false;
+        isExit = false;
     }
     
-    Cell(int xPos, int yPos, boolean rightW, boolean topW, boolean leftW, boolean bottomW) {
-        x = xPos;
-        y = yPos;
+    Cell(int xInd, int yInd, boolean rightW, boolean topW, boolean leftW, boolean bottomW) {
+        xIndex = xInd;
+        yIndex = yInd;
         rightWall = rightW;
         topWall = topW;
         leftWall = leftW;
         bottomWall = bottomW;
+        isEntry = false;
+        isExit = false;
     }
     
-    void setPos(int xPos, int yPos) {
-        x = xPos;
-        y = yPos;
+    int getXIndex() {
+        return xIndex;
+    }
+    
+    int getYIndex() {
+        return yIndex;
+    }
+    
+    void setXYIndices(int xInd, int yInd) {
+        xIndex = xInd;
+        yIndex = yInd;
     }
     
     boolean hasRightWall() {
@@ -63,12 +77,31 @@ class Cell {
         bottomWall = bottomW;
     }
     
-    int getX() {
-        return x;
+    void setAsEntryOrExit() {
+        isEntry = true;
+        isExit = true;
     }
     
-    int getY() {
-        return y;
+    void setAsEntry() {
+        isEntry = true;
+        isExit = false;
+    }
+    
+    void setAsExit() {
+        isEntry = false;
+        isExit = true;
+    }
+    
+    boolean isEntryOrExit() {
+        return (isEntry || isExit);
+    }
+    
+    boolean isEntry() {
+        return isEntry;
+    }
+    
+    boolean isExit() {
+        return isExit;
     }
 }
 
