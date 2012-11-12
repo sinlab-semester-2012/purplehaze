@@ -78,17 +78,15 @@ Keyboard controls:
 Development Status
 ==================
 
-Week 8:
-- Mid-semester presentation
-- Working on enhancing interaction in Bézier curve activity.
-- Working on the second idea, the maze escape (currently on maze generation step).
+Week 9:
+- First basic functioning version of maze activity
+- still having to work on refined interaction for Bezier curve
 
 To Do / Issues
 --------------
 - Add more interaction to the Bézier wall. Work in progress.
 - Continue working on the maze.
 - Refine third idea (halos interaction).
-- Define clear goals for the end.
 
 Previous Protyping Steps
 ------------------------
@@ -119,6 +117,11 @@ Week 7:
 - First version of dynamic Bézier curve/wall fully working 
 - Additional refinements on dynamic Bézier curve/wall (adding debugging display,
 preparing for some refactoring, working on enhanced interaction)
+- Working on the second idea, the maze escape (currently on maze generation step).
+
+Week 8:
+- Mid-semester presentation
+- Working on enhancing interaction in Bézier curve activity.
 - Working on the second idea, the maze escape (currently on maze generation step).
 
 --------------------------------------------------------------------------------
