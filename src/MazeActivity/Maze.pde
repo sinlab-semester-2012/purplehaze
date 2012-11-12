@@ -11,11 +11,20 @@ class Maze {
     
     PVector playerPos;
     
+    int gameState;
+    static final int GS_INIT = 0;
+    static final int GS_PLAYING = 1;
+    static final int GS_WON = 2;
+    static final int GS_LOST = 3;
+    static final int GSSIZE = 4;
+    
     Maze(int nbCX, int nbCY) {
         nbCellsX = nbCX;
         nbCellsY = nbCY;
         initialize();
         generate();
+        playerPos = new PVector();
+        gameState = GS_INIT;
     }
     
     // initialize data
@@ -28,7 +37,6 @@ class Maze {
                 cells[x][y] = new Cell(x, y);
             }
         }
-        playerPos = new PVector();
     }
     
     // generate maze using backtracking depth-first search algorithm
@@ -332,13 +340,15 @@ class Maze {
         }
     }
     
-    
     // interact with detected blob (player)
-    void interact(Blob blob) {
-        //playerPos.set(blob.centroid.x, blob.centroid.y, 0);
-        playerPos.set(mouseX, mouseY, 0);
+    void interact(Blob[] blobs) {
+        if (blobs != null && blobs.length > 0) {
+            //playerPos.set(blobs[0].centroid.x, blobs[0].centroid.y, 0);
+            playerPos.set(mouseX, mouseY, 0);
+        }
     }
     
+    // get cell in which player is positioned
     Cell getPlayerCell() {
         float xPos = playerPos.x;
         float yPos = playerPos.y;
@@ -347,16 +357,119 @@ class Maze {
         return cells[x][y];
     }
     
+    // launch the game, i.e. set the game state accordingly
+    void launch() {
+        gameState = GS_PLAYING;
+    }
+    
+    // update game
+    void play() {
+        switch (gameState) {
+            case GS_INIT:
+                // do nothing
+                break;
+            case GS_PLAYING:
+                if (hasPlayerReachedExit()) {
+                    gameState = GS_WON;
+                } else if (hasPlayerTouchedAWall()) {
+                    gameState = GS_LOST;
+                }
+                break;
+            case GS_WON:
+                // add timer
+                gameState = GS_INIT;
+                reset();
+                break;
+            case GS_LOST:
+                // add timer
+                gameState = GS_INIT;
+                reset();
+                break;
+            default:
+                break;
+        }
+    }
+    
+    // test whether player reached the exit
+    boolean hasPlayerReachedExit() {
+        boolean reachedExit = false;
+        
+        Cell playerCell = getPlayerCell();
+        int x = playerCell.getXIndex();
+        int y = playerCell.getYIndex();
+        float xPos = playerPos.x;
+        float yPos = playerPos.y;
+        
+        if (cells[x][y].isEntryOrExit()) {
+            if (cells[x][y].hasRightWall() && x == nbCellsX - 1) {
+                reachedExit = (abs(xPos - (x + 1)*sizeCellX) < EDGE_WIDTH/2);
+            } else if (cells[x][y].hasTopWall() && y == 0) {
+                reachedExit = (abs(yPos - y*sizeCellY) < EDGE_WIDTH/2);
+            } else if (cells[x][y].hasLeftWall() && x == 0) {
+                reachedExit = (abs(xPos - x*sizeCellX) < EDGE_WIDTH/2);
+            } else if (cells[x][y].hasBottomWall() && y == nbCellsY - 1) {
+                reachedExit = (abs(yPos - (y + 1)*sizeCellY) < EDGE_WIDTH/2);
+            }
+        }
+        return reachedExit;
+    }
+    
+    // test for collision between walls and player
+    boolean hasPlayerTouchedAWall() {
+        boolean touchedAWall = false;
+        
+        Cell playerCell = getPlayerCell();
+        int x = playerCell.getXIndex();
+        int y = playerCell.getYIndex();
+        float xPos = playerPos.x;
+        float yPos = playerPos.y;
+        
+        if (cells[x][y].hasRightWall()) {
+            touchedAWall = (abs(xPos - (x + 1)*sizeCellX) < EDGE_WIDTH/2);
+        }
+        if (cells[x][y].hasTopWall()) {
+            touchedAWall = (abs(yPos - y*sizeCellY) < EDGE_WIDTH/2);
+        }
+        if (cells[x][y].hasLeftWall()) {
+            touchedAWall = (abs(xPos - x*sizeCellX) < EDGE_WIDTH/2);
+        }
+        if (cells[x][y].hasBottomWall()) {
+            touchedAWall = (abs(yPos - (y + 1)*sizeCellY) < EDGE_WIDTH/2);
+        }
+        return touchedAWall;
+    }
+    
+    // reset maze
+    void reset() {
+        initialize();
+        generate();
+    }
+    
     // draw maze and maze objects
     void draw() {
-        //drawWalls();
-        drawNearestWalls();
-        drawEntryAndExit();
+        switch (gameState) {
+            case GS_INIT:
+                drawWalls(color(255));
+                drawEntryAndExit(color(0, 255, 0));
+                break;
+            case GS_PLAYING:
+                drawNearestWalls(color(255));
+                drawEntryAndExit(color(0, 255, 0));
+                break;
+            case GS_WON:
+                drawWalls(color(0, 255, 0));
+                break;
+            case GS_LOST:
+                drawWalls(color(255, 0, 0));
+                break;
+            default:
+                break;
+        }
     }
     
     // draw walls of maze
-    void drawWalls() {
-        stroke(255);
+    void drawWalls(color c) {
+        stroke(c);
         strokeWeight(EDGE_WIDTH);
         strokeCap(ROUND);
         for (int x = 0; x < nbCellsX; x++) {
@@ -377,12 +490,12 @@ class Maze {
         }
     }
     
-    void drawNearestWalls() {
-        Cell cell = getPlayerCell();
-        int x = cell.getXIndex();
-        int y = cell.getYIndex();
+    void drawNearestWalls(color c) {
+        Cell playerCell = getPlayerCell();
+        int x = playerCell.getXIndex();
+        int y = playerCell.getYIndex();
         
-        stroke(255);
+        stroke(c);
         strokeWeight(EDGE_WIDTH);
         strokeCap(ROUND);
         if (cells[x][y].hasRightWall()) {
@@ -399,8 +512,8 @@ class Maze {
         }
     }
     
-    void drawEntryAndExit() {
-        stroke(0, 255, 0);
+    void drawEntryAndExit(color c) {
+        stroke(c);
         strokeWeight(EDGE_WIDTH);
         strokeCap(ROUND);
         for (int x = 0; x < nbCellsX; x++) {
@@ -408,14 +521,11 @@ class Maze {
                 if (cells[x][y].isEntryOrExit()) {
                     if (cells[x][y].hasRightWall() && x == nbCellsX - 1) {
                         line((x + 1)*sizeCellX - 1, y*sizeCellY, (x + 1)*sizeCellX - 1, (y + 1)*sizeCellY - 1);
-                    }
-                    if (cells[x][y].hasTopWall() && y == 0) {
+                    } else if (cells[x][y].hasTopWall() && y == 0) {
                         line(x*sizeCellX, y*sizeCellY, (x + 1)*sizeCellX - 1, y*sizeCellY);
-                    }
-                    if (cells[x][y].hasLeftWall() && x == 0) {
+                    } else if (cells[x][y].hasLeftWall() && x == 0) {
                         line(x*sizeCellX, y*sizeCellY, x*sizeCellX, (y + 1)*sizeCellY - 1);
-                    }
-                    if (cells[x][y].hasBottomWall() && y == nbCellsY - 1) {
+                    } else if (cells[x][y].hasBottomWall() && y == nbCellsY - 1) {
                         line(x*sizeCellX, (y + 1)*sizeCellY - 1, (x + 1)*sizeCellX - 1, (y + 1)*sizeCellY - 1);
                     }
                 }

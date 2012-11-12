@@ -7,8 +7,7 @@ class Cell {
     boolean topWall;
     boolean leftWall;
     boolean bottomWall;
-    boolean isEntry;
-    boolean isExit;
+    boolean isEntryOrExit;
     
     Cell(int xInd, int yInd) {
         xIndex = xInd;
@@ -17,8 +16,7 @@ class Cell {
         topWall = true;
         leftWall = true;
         bottomWall = true;
-        isEntry = false;
-        isExit = false;
+        isEntryOrExit = false;
     }
     
     Cell(int xInd, int yInd, boolean rightW, boolean topW, boolean leftW, boolean bottomW) {
@@ -28,8 +26,7 @@ class Cell {
         topWall = topW;
         leftWall = leftW;
         bottomWall = bottomW;
-        isEntry = false;
-        isExit = false;
+        isEntryOrExit = false;
     }
     
     int getXIndex() {
@@ -78,30 +75,11 @@ class Cell {
     }
     
     void setAsEntryOrExit() {
-        isEntry = true;
-        isExit = true;
-    }
-    
-    void setAsEntry() {
-        isEntry = true;
-        isExit = false;
-    }
-    
-    void setAsExit() {
-        isEntry = false;
-        isExit = true;
+        isEntryOrExit = true;
     }
     
     boolean isEntryOrExit() {
-        return (isEntry || isExit);
-    }
-    
-    boolean isEntry() {
-        return isEntry;
-    }
-    
-    boolean isExit() {
-        return isExit;
+        return isEntryOrExit;
     }
 }
 
