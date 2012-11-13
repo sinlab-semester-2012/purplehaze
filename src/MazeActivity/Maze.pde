@@ -3,6 +3,9 @@ class Maze {
     
     final float EDGE_WIDTH = 0.0075*(width + height);
     
+    final float GS_WON_LOST_DURATION_MS = 3000;
+    final float GS_WON_LOST_FLICKER_DURATION_MS = 1000;
+    
     int nbCellsX;
     int nbCellsY;
     float sizeCellX;
@@ -18,13 +21,18 @@ class Maze {
     static final int GS_LOST = 3;
     static final int GSSIZE = 4;
     
+    int prevMillis;
+    
     Maze(int nbCX, int nbCY) {
         nbCellsX = nbCX;
         nbCellsY = nbCY;
+        
         initialize();
         generate();
+        
         playerPos = new PVector();
         gameState = GS_INIT;
+        prevMillis = 0;
     }
     
     // initialize data
@@ -371,19 +379,23 @@ class Maze {
             case GS_PLAYING:
                 if (hasPlayerReachedExit()) {
                     gameState = GS_WON;
+                    prevMillis = millis();
                 } else if (hasPlayerTouchedAWall()) {
                     gameState = GS_LOST;
+                    prevMillis = millis();
                 }
                 break;
             case GS_WON:
-                // add timer
-                gameState = GS_INIT;
-                reset();
+                if ((millis() - prevMillis) > GS_WON_LOST_DURATION_MS) {
+                    gameState = GS_INIT;
+                    reset();
+                }
                 break;
             case GS_LOST:
-                // add timer
-                gameState = GS_INIT;
-                reset();
+                if ((millis() - prevMillis) > GS_WON_LOST_DURATION_MS) {
+                    gameState = GS_INIT;
+                    reset();
+                }
                 break;
             default:
                 break;
@@ -457,10 +469,14 @@ class Maze {
                 drawEntryAndExit(color(0, 255, 0));
                 break;
             case GS_WON:
-                drawWalls(color(0, 255, 0));
+                if (millis() % GS_WON_LOST_FLICKER_DURATION_MS < GS_WON_LOST_FLICKER_DURATION_MS/2) {
+                    drawWalls(color(0, 255, 0));
+                }
                 break;
             case GS_LOST:
-                drawWalls(color(255, 0, 0));
+                if (millis() % GS_WON_LOST_FLICKER_DURATION_MS < GS_WON_LOST_FLICKER_DURATION_MS/2) {
+                    drawWalls(color(255, 0, 0));
+                }
                 break;
             default:
                 break;
