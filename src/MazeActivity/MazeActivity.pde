@@ -91,7 +91,9 @@ void toggleBlobDebugDisplay() {
 void keyPressed() {
     if (key == ' ') {
         opencv.remember();
-        maze.launch();
+        if (maze.isInInitState()) {
+            maze.launch();
+        }
     } else if (key == '/') {
         toggleOpencvDebugDisplay();
     } else if (key == '*') {
