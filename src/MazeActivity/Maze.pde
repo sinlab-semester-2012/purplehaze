@@ -1,7 +1,9 @@
 
 class Maze {
     
-    final float EDGE_WIDTH = 0.01*(width + height);
+    final float EDGE_WIDTH = 0.0075*(width + height);
+    
+    final float ENTERING_MAZE_DURATION_MS = 1500;
     
     final float GS_WON_LOST_DURATION_MS = 3000;
     final float GS_WON_LOST_FLICKER_DURATION_MS = 1000;
@@ -22,7 +24,8 @@ class Maze {
     static final int GS_LOST = 3;
     static final int GSSIZE = 4;
     
-    int prevMillis;
+    int prevMillisEntering;
+    int prevMillisWonLost;
     
     Maze(int nbCX, int nbCY) {
         nbCellsX = nbCX;
@@ -31,10 +34,9 @@ class Maze {
         initialize();
         generate();
         
-        playerPos = new PVector();
-        playerEntered = false;
         gameState = GS_INIT;
-        prevMillis = 0;
+        prevMillisEntering = 0;
+        prevMillisWonLost = 0;
     }
     
     // initialize data
@@ -47,6 +49,9 @@ class Maze {
                 cells[x][y] = new Cell(x, y);
             }
         }
+        
+        playerPos = new PVector();
+        playerEntered = false;
     }
     
     // generate maze using backtracking depth-first search algorithm
@@ -380,26 +385,30 @@ class Maze {
                 break;
             case GS_PLAYING:
                 if (hasPlayerTouchedAWall()) {
-                    println("touched" + playerPos + millis());
                     if (!playerEntered) {
                         playerEntered = hasPlayerEntered();
-                    } else if (hasPlayerReachedExit()) {
-                        gameState = GS_WON;
-                        prevMillis = millis();
-                    } else {
-                        gameState = GS_LOST;
-                        prevMillis = millis();
+                        if (playerEntered) {
+                            prevMillisEntering = millis();
+                        }
+                    } else if ((millis() - prevMillisEntering) > ENTERING_MAZE_DURATION_MS) {
+                        if (hasPlayerExited()) {
+                            gameState = GS_WON;
+                            prevMillisWonLost = millis();
+                        } else {
+                            gameState = GS_LOST;
+                            prevMillisWonLost = millis();
+                        }
                     }
                 }
                 break;
             case GS_WON:
-                if ((millis() - prevMillis) > GS_WON_LOST_DURATION_MS) {
+                if ((millis() - prevMillisWonLost) > GS_WON_LOST_DURATION_MS) {
                     gameState = GS_INIT;
                     reset();
                 }
                 break;
             case GS_LOST:
-                if ((millis() - prevMillis) > GS_WON_LOST_DURATION_MS) {
+                if ((millis() - prevMillisWonLost) > GS_WON_LOST_DURATION_MS) {
                     gameState = GS_INIT;
                     reset();
                 }
@@ -466,8 +475,8 @@ class Maze {
     }
     
     // test whether player reached the exit
-    boolean hasPlayerReachedExit() {
-        boolean reachedExit = false;
+    boolean hasPlayerExited() {
+        boolean exited = false;
         
         Cell playerCell = getPlayerCell();
         int x = playerCell.getXIndex();
@@ -477,16 +486,16 @@ class Maze {
         
         if (cells[x][y].isExit()) {
             if (cells[x][y].hasRightWall() && x == nbCellsX - 1) {
-                reachedExit = (abs(xPos - (x + 1)*sizeCellX) < EDGE_WIDTH/2);
+                exited = (abs(xPos - (x + 1)*sizeCellX) < EDGE_WIDTH/2);
             } else if (cells[x][y].hasTopWall() && y == 0) {
-                reachedExit = (abs(yPos - y*sizeCellY) < EDGE_WIDTH/2);
+                exited = (abs(yPos - y*sizeCellY) < EDGE_WIDTH/2);
             } else if (cells[x][y].hasLeftWall() && x == 0) {
-                reachedExit = (abs(xPos - x*sizeCellX) < EDGE_WIDTH/2);
+                exited = (abs(xPos - x*sizeCellX) < EDGE_WIDTH/2);
             } else if (cells[x][y].hasBottomWall() && y == nbCellsY - 1) {
-                reachedExit = (abs(yPos - (y + 1)*sizeCellY) < EDGE_WIDTH/2);
+                exited = (abs(yPos - (y + 1)*sizeCellY) < EDGE_WIDTH/2);
             }
         }
-        return reachedExit;
+        return exited;
     }
     
     // reset maze
