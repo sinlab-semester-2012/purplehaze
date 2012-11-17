@@ -380,6 +380,7 @@ class Maze {
                 break;
             case GS_PLAYING:
                 if (hasPlayerTouchedAWall()) {
+                    println("touched" + playerPos + millis());
                     if (!playerEntered) {
                         playerEntered = hasPlayerEntered();
                     } else if (hasPlayerReachedExit()) {
@@ -406,6 +407,34 @@ class Maze {
             default:
                 break;
         }
+    }
+    
+    // test for collision between walls and player
+    boolean hasPlayerTouchedAWall() {
+        boolean touchedRightWall = false;
+        boolean touchedTopWall = false;
+        boolean touchedLeftWall = false;
+        boolean touchedBottomWall = false;
+        
+        Cell playerCell = getPlayerCell();
+        int x = playerCell.getXIndex();
+        int y = playerCell.getYIndex();
+        float xPos = playerPos.x;
+        float yPos = playerPos.y;
+        
+        if (cells[x][y].hasRightWall()) {
+            touchedRightWall = (abs(xPos - (x + 1)*sizeCellX) < EDGE_WIDTH/2);
+        }
+        if (cells[x][y].hasTopWall()) {
+            touchedTopWall = (abs(yPos - y*sizeCellY) < EDGE_WIDTH/2);
+        }
+        if (cells[x][y].hasLeftWall()) {
+            touchedLeftWall = (abs(xPos - x*sizeCellX) < EDGE_WIDTH/2);
+        }
+        if (cells[x][y].hasBottomWall()) {
+            touchedBottomWall = (abs(yPos - (y + 1)*sizeCellY) < EDGE_WIDTH/2);
+        }
+        return (touchedRightWall || touchedTopWall || touchedLeftWall || touchedBottomWall);
     }
     
     // test whether player has entered maze
@@ -458,31 +487,6 @@ class Maze {
             }
         }
         return reachedExit;
-    }
-    
-    // test for collision between walls and player
-    boolean hasPlayerTouchedAWall() {
-        boolean touchedAWall = false;
-        
-        Cell playerCell = getPlayerCell();
-        int x = playerCell.getXIndex();
-        int y = playerCell.getYIndex();
-        float xPos = playerPos.x;
-        float yPos = playerPos.y;
-        
-        if (cells[x][y].hasRightWall()) {
-            touchedAWall = (abs(xPos - (x + 1)*sizeCellX) < EDGE_WIDTH/2);
-        }
-        if (cells[x][y].hasTopWall()) {
-            touchedAWall = (abs(yPos - y*sizeCellY) < EDGE_WIDTH/2);
-        }
-        if (cells[x][y].hasLeftWall()) {
-            touchedAWall = (abs(xPos - x*sizeCellX) < EDGE_WIDTH/2);
-        }
-        if (cells[x][y].hasBottomWall()) {
-            touchedAWall = (abs(yPos - (y + 1)*sizeCellY) < EDGE_WIDTH/2);
-        }
-        return touchedAWall;
     }
     
     // reset maze
