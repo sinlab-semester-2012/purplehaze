@@ -1,6 +1,8 @@
 
 class Maze {
     
+    final int NB_ENTRANCES = 2;
+    
     final float EDGE_WIDTH = 0.0075*(width + height);
     
     final float ENTERING_MAZE_DURATION_MS = 1500;
@@ -109,8 +111,8 @@ class Maze {
             }
         }
         
-        // 3. pick entry and exit of maze
-        generatePickEntryAndExit();
+        // 3. pick entrances of maze
+        generatePickEntrances();
     }
     
     // used only in generate(): check whether there are unvisited cells
@@ -329,12 +331,12 @@ class Maze {
         return unvisitedCellInd;
     }
     
-    // used only in generate(): pick entry and exit cells
-    // (specific role will be determined when player enters maze by one of them)
-    void generatePickEntryAndExit() {
+    // used only in generate(): pick entrance cells at borders
+    // (specific role (way in/out) will be determined when player enters maze by one of them)
+    void generatePickEntrances() {
         int r, x, y;
         
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < NB_ENTRANCES; i++) {
             do {
                 r = floor(random(0, 4));
                 if (r == 0) {
@@ -350,8 +352,8 @@ class Maze {
                     x = floor(random(0, nbCellsX));
                     y = nbCellsY - 1;
                 }
-            } while (cells[x][y].isEntryAndExit());
-            cells[x][y].setAsEntryAndExit();
+            } while (cells[x][y].isEntrance());
+            cells[x][y].setIsEntrance(true);
         }
     }
     
@@ -446,8 +448,8 @@ class Maze {
         return (touchedRightWall || touchedTopWall || touchedLeftWall || touchedBottomWall);
     }
     
-    // test whether player has entered maze
-    // and if so, update status of entry and exit cells
+    // test whether player has entered maze and if so, update status of entrance cells 
+    // (cell by which player entered is not an entrance anymore)
     boolean hasPlayerEntered() {
         boolean entered = false;
         
@@ -457,7 +459,7 @@ class Maze {
         float xPos = playerPos.x;
         float yPos = playerPos.y;
         
-        if (cells[x][y].isEntryAndExit()) {
+        if (cells[x][y].isEntrance()) {
             if (cells[x][y].hasRightWall() && x == nbCellsX - 1) {
                 entered = (abs(xPos - (x + 1)*sizeCellX) < EDGE_WIDTH/2);
             } else if (cells[x][y].hasTopWall() && y == 0) {
@@ -469,7 +471,7 @@ class Maze {
             }
         }
         if (entered) {
-            cells[x][y].setAsEntry();
+            cells[x][y].setIsEntrance(false);
         }
         return entered;
     }
@@ -484,7 +486,7 @@ class Maze {
         float xPos = playerPos.x;
         float yPos = playerPos.y;
         
-        if (cells[x][y].isExit()) {
+        if (cells[x][y].isEntrance()) {
             if (cells[x][y].hasRightWall() && x == nbCellsX - 1) {
                 exited = (abs(xPos - (x + 1)*sizeCellX) < EDGE_WIDTH/2);
             } else if (cells[x][y].hasTopWall() && y == 0) {
@@ -504,7 +506,7 @@ class Maze {
         generate();
     }
     
-    // check whether maze is in GS_INIT state
+    // check whether maze is in initialization state
     boolean isInInitState() {
         return (gameState == GS_INIT);
     }
@@ -513,12 +515,11 @@ class Maze {
     void draw() {
         switch (gameState) {
             case GS_INIT:
-                drawWalls(color(255));
-                drawEntryAndExit(color(0, 255, 0));
+                // draw nothing
                 break;
             case GS_PLAYING:
                 drawNearestWalls(color(255));
-                drawEntryAndExit(color(0, 255, 0));
+                drawEntrances(color(0, 255, 0));
                 break;
             case GS_WON:
                 if (millis() % GS_WON_LOST_FLICKER_DURATION_MS < GS_WON_LOST_FLICKER_DURATION_MS/2) {
@@ -558,6 +559,7 @@ class Maze {
         }
     }
     
+    // draw only walls of cell in which player is located
     void drawNearestWalls(color c) {
         Cell playerCell = getPlayerCell();
         int x = playerCell.getXIndex();
@@ -580,13 +582,14 @@ class Maze {
         }
     }
     
-    void drawEntryAndExit(color c) {
+    // draw only entrance(s) of maze
+    void drawEntrances(color c) {
         stroke(c);
         strokeWeight(EDGE_WIDTH);
         strokeCap(ROUND);
         for (int x = 0; x < nbCellsX; x++) {
             for (int y = 0; y < nbCellsY; y++) {
-                if (cells[x][y].isEntryAndExit()) {
+                if (cells[x][y].isEntrance()) {
                     if (cells[x][y].hasRightWall() && x == nbCellsX - 1) {
                         line((x + 1)*sizeCellX - 1, y*sizeCellY, (x + 1)*sizeCellX - 1, (y + 1)*sizeCellY - 1);
                     } else if (cells[x][y].hasTopWall() && y == 0) {
