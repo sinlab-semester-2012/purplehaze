@@ -1,5 +1,5 @@
 
-class DynBezierCurve {
+class BezierWall {
     
     final int MIN_NB_POINTS = 2;
     final int MAX_NB_POINTS = 7;
@@ -34,7 +34,7 @@ class DynBezierCurve {
     
     boolean debugDisplay;
 
-    DynBezierCurve(int nbP) {
+    BezierWall(int nbP) {
         nbPoints = max(MIN_NB_POINTS, min(nbP, MAX_NB_POINTS));
         nbCtrlPoints = 2*nbPoints - 2;
         

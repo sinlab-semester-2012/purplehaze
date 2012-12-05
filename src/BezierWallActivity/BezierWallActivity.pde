@@ -10,7 +10,7 @@ int heightCapture = 480;
 int fpsCapture = 30;
 
 Blob[] blobs;
-DynBezierCurve dynBezierCurve;
+BezierWall bezierWall;
 
 int opencvDebugDisplay;
 static final int OCVDD_NONE = 0;
@@ -32,7 +32,7 @@ void setup() {
     opencv = new OpenCV(this);
     opencv.allocate(widthCapture, heightCapture);
     
-    dynBezierCurve = new DynBezierCurve(2);
+    bezierWall = new BezierWall(2);
     
     opencvDebugDisplay = OCVDD_NONE;
     blobDebugDisplay = false;
@@ -78,9 +78,9 @@ void draw() {
         }
     }
     
-    dynBezierCurve.draw();
-    dynBezierCurve.move();
-    dynBezierCurve.interact(blobs);
+    bezierWall.draw();
+    bezierWall.move();
+    bezierWall.interact(blobs);
 }
 
 void toggleOpencvDebugDisplay() {
@@ -93,18 +93,18 @@ void toggleBlobDebugDisplay() {
 
 void keyPressed() {
     if (key == ' ') {
-        if (dynBezierCurve.isInInitState()) {
+        if (bezierWall.isInInitState()) {
             opencv.remember();
-            dynBezierCurve.launch();
+            bezierWall.launch();
         }
     } else if (key == ENTER || key == RETURN) {
-        dynBezierCurve.reset();
+        bezierWall.reset();
     } else if (key == '-') {
-        dynBezierCurve.decreaseNbPoints();
+        bezierWall.decreaseNbPoints();
     } else if (key == '+') {
-        dynBezierCurve.increaseNbPoints();
+        bezierWall.increaseNbPoints();
     } else if (key == '.') {
-        dynBezierCurve.toggleDebugDisplay();
+        bezierWall.toggleDebugDisplay();
     } else if (key == '/') {
         toggleOpencvDebugDisplay();
     } else if (key == '*') {

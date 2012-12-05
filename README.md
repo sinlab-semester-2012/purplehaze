@@ -55,13 +55,13 @@ Each activity has a dedicated folder. In each folder, you will find the main
 Processing sketch to run (the one with the same name as the folder) and 
 additional useful source files.
 
-DynBezierCurveActivity
+BezierWall
 ----------------
 
 Setup and run:
-- Run DynBezierCurveActivity.pde
-- The Bézier curve will appear and move.
-- Point the camera to a blank (uniform) wall or floor, and press the space bar once. 
+- Run BezierWall.pde
+- Point the camera to a blank (uniform) floor, and press the space bar once.
+- The Bézier wall will appear and move.
 - Step in front of the camera and interact with the curve.
 
 Keyboard controls:
@@ -73,20 +73,50 @@ Keyboard controls:
 - / = toggles OpenCV debugging display 
 - * = toggles blob detection debugging display 
 
+MazeActivity
+----------------
+
+Setup and run:
+- Run MazeActivity.pde
+- Point the camera to a blank (uniform) floor, and press the space bar once. 
+- Two green panels will appear. These are the two entrances of the maze. 
+You have to enter the maze by one of them.
+- Once you're inside the maze, you will have to get out by going through 
+the other green "door". You cannot see every wall of the maze, only those 
+that are near you.
+- If you get out, you win. If you touch a wall, you lose.
+
+Keyboard controls:
+- Space Bar = capture current frame as reference image for blob detection
+- * = toggles blob detection debugging display 
+
+FightingHalosActivity
+----------------
+
+Setup and run:
+- Run FightingHalosActivity.pde
+- Point the camera to a blank (uniform) floor, and press the space bar once.
+- 
+
+Keyboard controls:
+- Space Bar = capture current frame as reference image for blob detection
+- / = toggles OpenCV debugging display 
+- * = toggles blob detection debugging display 
+
 
 
 Development Status
 ==================
 
-Week 9:
-- First basic functioning version of maze activity
-- still having to work on refined interaction for Bezier curve
+Week 12:
+- Code maintenance on first two activities (Bézier & maze).
+- Begun working on third activity (halos).
 
 To Do / Issues
 --------------
-- Add more interaction to the Bézier wall. Work in progress.
-- Continue working on the maze.
-- Refine third idea (halos interaction).
+- Add more interaction to the Bézier wall.
+- Add coins to collect and pursuing monster to the maze escape.
+- Refine third task.
 
 Previous Protyping Steps
 ------------------------
@@ -123,5 +153,8 @@ Week 8:
 - Mid-semester presentation
 - Working on enhancing interaction in Bézier curve activity.
 - Working on the second idea, the maze escape (currently on maze generation step).
+
+Week 10:
+- Finished first working version of the maze escape.
 
 --------------------------------------------------------------------------------
