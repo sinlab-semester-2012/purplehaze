@@ -93,7 +93,10 @@ void toggleBlobDebugDisplay() {
 
 void keyPressed() {
     if (key == ' ') {
-        opencv.remember();
+        if (dynBezierCurve.isInInitState()) {
+            opencv.remember();
+            dynBezierCurve.launch();
+        }
     } else if (key == ENTER || key == RETURN) {
         dynBezierCurve.reset();
     } else if (key == '-') {

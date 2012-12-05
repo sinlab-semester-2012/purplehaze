@@ -26,8 +26,13 @@ class DynBezierCurve {
     float[][] pointsMotionParams;
     PVector[] ctrlPoints;
     float[][] ctrlPointsMotionParams;
+    
+    int state;
+    static final int S_INIT = 0;
+    static final int S_RUNNING = 1;
+    static final int SSIZE = 2;
+    
     boolean debugDisplay;
-
 
     DynBezierCurve(int nbP) {
         nbPoints = max(MIN_NB_POINTS, min(nbP, MAX_NB_POINTS));
@@ -36,6 +41,8 @@ class DynBezierCurve {
         boolean fixedFirstLastPts = false;
         initialize(fixedFirstLastPts);
         generate(fixedFirstLastPts);
+        
+        state = S_INIT;
         
         debugDisplay = false;
     }
@@ -171,13 +178,13 @@ class DynBezierCurve {
         return newCtrlPt;
     }
     
-    // generate move parameters
+    // generate motion parameters
     void genMotionParams() {
         genPtsMotionParams();
         genCtrlPtsMotionParams();
     }
     
-    // generate move parameters for position points
+    // generate motion parameters for position points
     void genPtsMotionParams() {
         float a, b, xCenterOrig, yCenterOrig, xCenterTemp, yCenterTemp, theta;
         for (int i = 0; i < nbPoints; i++) {
@@ -207,7 +214,7 @@ class DynBezierCurve {
         }
     }
     
-    // generate move parameters for control points
+    // generate motion parameters for control points
     void genCtrlPtsMotionParams() {
         float a, b, xCenterOrig, yCenterOrig, xCenterTemp, yCenterTemp, theta;
         for (int j = 0; j < nbCtrlPoints; j++) {
@@ -228,13 +235,13 @@ class DynBezierCurve {
         }        
     }
     
-    // make Bezier curve vary
+    // animate Bezier curve
     void move() {
         movePts();
         moveCtrlPts();
     }
     
-    // make position points vary (move on an ellipse)
+    // make position points move on their ellipse trajectories
     // (except for the first and last one)
     void movePts() {
         for (int i = 1; i < nbPoints - 1; i++) {
@@ -255,7 +262,7 @@ class DynBezierCurve {
         pointsMotionParams[i][6] = theta;
     }
     
-    // make control points vary (move on an ellipse)
+    // make control points move on their ellipse trajectories
     void moveCtrlPts() {
         moveCtrlPt(0);
         moveCtrlPt(nbCtrlPoints - 1);
@@ -299,6 +306,7 @@ class DynBezierCurve {
     }
     
     // make curve interact with detected blobs
+    // (curve should avoid approaching blobs)
     void interact(Blob[] blobs) {
         if (blobs != null && blobs.length > 0) {
             int[] nearestMotionCentersPointsIndices = null;
@@ -400,60 +408,6 @@ class DynBezierCurve {
         return nearestMtnCenterPtsIdcs;
     }
     
-    // draw Bezier curve on screen
-    void draw() {
-        if (debugDisplay) {
-            // draw position points and control points
-            noStroke();
-            fill(0, 255, 0);
-            ellipse(points[0].x, points[0].y, 20, 20);
-            ellipse(points[nbPoints - 1].x, points[nbPoints - 1].y, 20, 20);
-            fill(255, 0, 0);
-            ellipse(ctrlPoints[0].x, ctrlPoints[0].y, 10, 10);
-            ellipse(ctrlPoints[nbCtrlPoints - 1].x, ctrlPoints[nbCtrlPoints - 1].y, 10, 10);
-            strokeWeight(1);
-            stroke(255, 0, 0);
-            line(ctrlPoints[0].x, ctrlPoints[0].y, points[0].x, points[0].y);
-            line(ctrlPoints[nbCtrlPoints - 1].x, ctrlPoints[nbCtrlPoints - 1].y, points[nbPoints - 1].x, points[nbPoints - 1].y);
-            noStroke();
-            int n = 1;
-            for (int m = 1; m < nbPoints - 1; m++) {
-                fill(0, 255, 0);
-                ellipse(points[m].x, points[m].y, 20, 20);
-                fill(255, 0, 0);
-                ellipse(ctrlPoints[n].x, ctrlPoints[n].y, 10, 10);
-                ellipse(ctrlPoints[n + 1].x, ctrlPoints[n + 1].y, 10, 10);
-                strokeWeight(1);
-                stroke(255, 0, 0);
-                line(ctrlPoints[n].x, ctrlPoints[n].y, points[m].x, points[m].y);
-                line(ctrlPoints[n + 1].x, ctrlPoints[n + 1].y, points[m].x, points[m].y);
-                noStroke();
-                n = n + 2;
-            }
-        }
-        
-        // draw curve
-        stroke(CURVE_COLOR);
-        strokeWeight(CURVE_STROKE_WEIGHT);
-        noFill();
-        beginShape();
-        vertex(points[0].x, points[0].y);
-        int j = 1;
-        for (int i = 1; i < nbPoints; i++) {
-            bezierVertex(ctrlPoints[j - 1].x, ctrlPoints[j - 1].y, 
-                ctrlPoints[j].x, ctrlPoints[j].y, 
-                points[i].x, points[i].y);
-            j = j + 2;
-        }
-        endShape();
-    }
-    
-    // regenerate curve
-    void reset() {
-        boolean fixedFirstLastPts = false;
-        generate(fixedFirstLastPts);
-    }
-    
     // decrease number of position points
     void decreaseNbPoints() {
         if (nbPoints > MIN_NB_POINTS) {
@@ -478,9 +432,88 @@ class DynBezierCurve {
         }
     }
     
+    // regenerate curve
+    void reset() {
+        boolean fixedFirstLastPts = false;
+        generate(fixedFirstLastPts);
+    }
+    
+    // launch activity (set to running state so that curve is displayed)
+    void launch() {
+        state = S_RUNNING;
+    }
+    
+    // check whether maze is in initialization state
+    boolean isInInitState() {
+        return (state == S_INIT);
+    }
+    
     // toggle graphical debug informations
     void toggleDebugDisplay() {
         debugDisplay = !debugDisplay;
+    }
+    
+    // draw Bezier curve on screen
+    void draw() {
+        switch (state) {
+            case S_INIT:
+                // draw nothing
+                break;
+            case S_RUNNING:
+                if (debugDisplay) {
+                    drawDebug();
+                }
+                drawCurve();
+            default:
+                break;
+        }
+    }
+    
+    // draw debug information on points
+    void drawDebug() {
+        noStroke();
+        fill(0, 255, 0);
+        ellipse(points[0].x, points[0].y, 20, 20);
+        ellipse(points[nbPoints - 1].x, points[nbPoints - 1].y, 20, 20);
+        fill(255, 0, 0);
+        ellipse(ctrlPoints[0].x, ctrlPoints[0].y, 10, 10);
+        ellipse(ctrlPoints[nbCtrlPoints - 1].x, ctrlPoints[nbCtrlPoints - 1].y, 10, 10);
+        strokeWeight(1);
+        stroke(255, 0, 0);
+        line(ctrlPoints[0].x, ctrlPoints[0].y, points[0].x, points[0].y);
+        line(ctrlPoints[nbCtrlPoints - 1].x, ctrlPoints[nbCtrlPoints - 1].y, points[nbPoints - 1].x, points[nbPoints - 1].y);
+        noStroke();
+        int n = 1;
+        for (int m = 1; m < nbPoints - 1; m++) {
+            fill(0, 255, 0);
+            ellipse(points[m].x, points[m].y, 20, 20);
+            fill(255, 0, 0);
+            ellipse(ctrlPoints[n].x, ctrlPoints[n].y, 10, 10);
+            ellipse(ctrlPoints[n + 1].x, ctrlPoints[n + 1].y, 10, 10);
+            strokeWeight(1);
+            stroke(255, 0, 0);
+            line(ctrlPoints[n].x, ctrlPoints[n].y, points[m].x, points[m].y);
+            line(ctrlPoints[n + 1].x, ctrlPoints[n + 1].y, points[m].x, points[m].y);
+            noStroke();
+            n = n + 2;
+        }
+    }
+    
+    // draw curve
+    void drawCurve() {
+        stroke(CURVE_COLOR);
+        strokeWeight(CURVE_STROKE_WEIGHT);
+        noFill();
+        beginShape();
+        vertex(points[0].x, points[0].y);
+        int j = 1;
+        for (int i = 1; i < nbPoints; i++) {
+            bezierVertex(ctrlPoints[j - 1].x, ctrlPoints[j - 1].y, 
+                ctrlPoints[j].x, ctrlPoints[j].y, 
+                points[i].x, points[i].y);
+            j = j + 2;
+        }
+        endShape();
     }
 }
 

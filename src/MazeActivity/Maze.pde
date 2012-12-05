@@ -7,8 +7,8 @@ class Maze {
     
     final float ENTERING_MAZE_DURATION_MS = 1500;
     
-    final float GS_WON_LOST_DURATION_MS = 3000;
-    final float GS_WON_LOST_FLICKER_DURATION_MS = 1000;
+    final float S_WON_LOST_DURATION_MS = 3000;
+    final float S_WON_LOST_FLICKER_DURATION_MS = 1000;
     
     int nbCellsX;
     int nbCellsY;
@@ -19,12 +19,12 @@ class Maze {
     PVector playerPos;
     boolean playerEntered;
     
-    int gameState;
-    static final int GS_INIT = 0;
-    static final int GS_PLAYING = 1;
-    static final int GS_WON = 2;
-    static final int GS_LOST = 3;
-    static final int GSSIZE = 4;
+    int state;
+    static final int S_INIT = 0;
+    static final int S_PLAYING = 1;
+    static final int S_WON = 2;
+    static final int S_LOST = 3;
+    static final int SSIZE = 4;
     
     int prevMillisEntering;
     int prevMillisWonLost;
@@ -36,7 +36,7 @@ class Maze {
         initialize();
         generate();
         
-        gameState = GS_INIT;
+        state = S_INIT;
         prevMillisEntering = 0;
         prevMillisWonLost = 0;
     }
@@ -374,18 +374,18 @@ class Maze {
         }
     }
     
-    // launch the game, i.e. set the game state accordingly
+    // launch the game, i.e. set the state accordingly
     void launch() {
-        gameState = GS_PLAYING;
+        state = S_PLAYING;
     }
     
-    // update game
+    // update state
     void play() {
-        switch (gameState) {
-            case GS_INIT:
+        switch (state) {
+            case S_INIT:
                 // do nothing
                 break;
-            case GS_PLAYING:
+            case S_PLAYING:
                 if (hasPlayerTouchedAWall()) {
                     if (!playerEntered) {
                         playerEntered = hasPlayerEntered();
@@ -394,24 +394,24 @@ class Maze {
                         }
                     } else if ((millis() - prevMillisEntering) > ENTERING_MAZE_DURATION_MS) {
                         if (hasPlayerExited()) {
-                            gameState = GS_WON;
+                            state = S_WON;
                             prevMillisWonLost = millis();
                         } else {
-                            gameState = GS_LOST;
+                            state = S_LOST;
                             prevMillisWonLost = millis();
                         }
                     }
                 }
                 break;
-            case GS_WON:
-                if ((millis() - prevMillisWonLost) > GS_WON_LOST_DURATION_MS) {
-                    gameState = GS_INIT;
+            case S_WON:
+                if ((millis() - prevMillisWonLost) > S_WON_LOST_DURATION_MS) {
+                    state = S_INIT;
                     reset();
                 }
                 break;
-            case GS_LOST:
-                if ((millis() - prevMillisWonLost) > GS_WON_LOST_DURATION_MS) {
-                    gameState = GS_INIT;
+            case S_LOST:
+                if ((millis() - prevMillisWonLost) > S_WON_LOST_DURATION_MS) {
+                    state = S_INIT;
                     reset();
                 }
                 break;
@@ -508,26 +508,26 @@ class Maze {
     
     // check whether maze is in initialization state
     boolean isInInitState() {
-        return (gameState == GS_INIT);
+        return (state == S_INIT);
     }
     
     // draw maze and maze objects
     void draw() {
-        switch (gameState) {
-            case GS_INIT:
+        switch (state) {
+            case S_INIT:
                 // draw nothing
                 break;
-            case GS_PLAYING:
+            case S_PLAYING:
                 drawNearestWalls(color(255));
                 drawEntrances(color(0, 255, 0));
                 break;
-            case GS_WON:
-                if (millis() % GS_WON_LOST_FLICKER_DURATION_MS < GS_WON_LOST_FLICKER_DURATION_MS/2) {
+            case S_WON:
+                if (millis() % S_WON_LOST_FLICKER_DURATION_MS < S_WON_LOST_FLICKER_DURATION_MS/2) {
                     drawWalls(color(0, 255, 0));
                 }
                 break;
-            case GS_LOST:
-                if (millis() % GS_WON_LOST_FLICKER_DURATION_MS < GS_WON_LOST_FLICKER_DURATION_MS/2) {
+            case S_LOST:
+                if (millis() % S_WON_LOST_FLICKER_DURATION_MS < S_WON_LOST_FLICKER_DURATION_MS/2) {
                     drawWalls(color(255, 0, 0));
                 }
                 break;

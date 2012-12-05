@@ -90,8 +90,8 @@ void toggleBlobDebugDisplay() {
 
 void keyPressed() {
     if (key == ' ') {
-        opencv.remember();
         if (maze.isInInitState()) {
+            opencv.remember();
             maze.launch();
         }
     } else if (key == '/') {
