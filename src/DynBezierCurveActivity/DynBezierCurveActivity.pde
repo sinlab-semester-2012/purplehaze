@@ -34,7 +34,7 @@ void setup() {
     
     dynBezierCurve = new DynBezierCurve(2);
     
-    opencvDebugDisplay = 0;
+    opencvDebugDisplay = OCVDD_NONE;
     blobDebugDisplay = false;
 }
 

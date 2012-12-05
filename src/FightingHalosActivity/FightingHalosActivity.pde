@@ -10,7 +10,7 @@ int heightCapture = 480;
 int fpsCapture = 30;
 
 Blob[] blobs;
-Maze maze;
+FightingHalos fightingHalos;
 
 int opencvDebugDisplay;
 static final int OCVDD_NONE = 0;
@@ -32,7 +32,7 @@ void setup() {
     opencv = new OpenCV(this);
     opencv.allocate(widthCapture, heightCapture);
     
-    maze = new Maze(8, 6);
+    fightingHalos = new FightingHalos();
     
     opencvDebugDisplay = OCVDD_NONE;
     blobDebugDisplay = false;
@@ -78,9 +78,8 @@ void draw() {
         }
     }
     
-    maze.draw();
-    maze.interact(blobs);
-    maze.play();
+    fightingHalos.draw();
+    fightingHalos.interact(blobs);
 }
 
 void toggleOpencvDebugDisplay() {
@@ -93,9 +92,9 @@ void toggleBlobDebugDisplay() {
 
 void keyPressed() {
     if (key == ' ') {
-        if (maze.isInInitState()) {
+        if (fightingHalos.isInInitState()) {
             opencv.remember();
-            maze.launch();
+            fightingHalos.launch();
         }
     } else if (key == '/') {
         toggleOpencvDebugDisplay();
