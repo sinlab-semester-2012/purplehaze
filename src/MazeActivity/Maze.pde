@@ -369,8 +369,8 @@ class Maze {
     // interact with detected blob (player)
     void interact(Blob[] blobs) {
         if (blobs != null && blobs.length > 0) {
-            //playerPos.set(blobs[0].centroid.x, blobs[0].centroid.y, 0);
-            playerPos.set(mouseX, mouseY, 0);
+            playerPos.set(blobs[0].centroid.x, blobs[0].centroid.y, 0);
+            //playerPos.set(mouseX, mouseY, 0);
         }
     }
     

@@ -311,7 +311,7 @@ class BezierWall {
         if (blobs != null && blobs.length > 0) {
             int[] nearestMotionCentersPointsIndices = null;
             int indexPt, indexCtrlPt1, indexCtrlPt2;
-            PVector blobCenter = new PVector();
+            PVector blobPos = new PVector();
             PVector pt = new PVector();
             PVector centerOrigPt = new PVector();
             PVector centerOrigCtrlPt1 = new PVector();
@@ -321,10 +321,10 @@ class BezierWall {
             float distance;
             
             for (int i = 0; i < blobs.length; i++) {
-                blobCenter.set(blobs[i].centroid.x, blobs[i].centroid.y, 0);
-                //blobCenter.set(mouseX, mouseY, 0);
+                blobPos.set(blobs[i].centroid.x, blobs[i].centroid.y, 0);
+                //blobPos.set(mouseX, mouseY, 0);
                 
-                nearestMotionCentersPointsIndices = getNearestMotionCentersPointsIndices(blobCenter);
+                nearestMotionCentersPointsIndices = getNearestMotionCentersPointsIndices(blobPos);
                 
                 if (nearestMotionCentersPointsIndices != null && nearestMotionCentersPointsIndices.length > 0) {
                     for (int k = 0; k < nearestMotionCentersPointsIndices.length; k++) {
@@ -338,21 +338,21 @@ class BezierWall {
                             centerOrigCtrlPt2.set(ctrlPointsMotionParams[indexCtrlPt2][2], ctrlPointsMotionParams[indexCtrlPt2][3], 0);
                             
                             pt.set(points[indexPt].x, points[indexPt].y, 0);
-                            distance = (PVector.sub(centerOrigPt, blobCenter)).mag();
-                            direction = PVector.sub(pt, blobCenter);
+                            distance = (PVector.sub(centerOrigPt, blobPos)).mag();
+                            direction = PVector.sub(pt, blobPos);
                             direction.div(direction.mag());
                             displacement = PVector.mult(direction, NEAREST_MOTION_ELLIPSE_RADIUS - distance);
                             
 //                            PVector linePP = PVector.sub(new PVector(points[nbPoints-1].x, points[nbPoints-1].y, 0), centerOrigPt);
 //                            PVector linePPNormalized = PVector.div(linePP, linePP.mag());
-//                            PVector linePO = PVector.sub(blobCenter, centerOrigPt);
+//                            PVector linePO = PVector.sub(blobPos, centerOrigPt);
 //                            PVector ptOnLine = PVector.add(centerOrigPt, PVector.mult(linePPNormalized, (PVector.dot(linePO, linePP))/linePP.mag()));
 //                            ellipse(ptOnLine.x, ptOnLine.y, 20, 20);
 //                            
 //                            pt.set(points[indexPt].x, points[indexPt].y, 0);
 //                            
-//                            distance = (PVector.sub(ptOnLine, blobCenter)).mag();
-//                            direction = PVector.sub(ptOnLine, blobCenter);
+//                            distance = (PVector.sub(ptOnLine, blobPos)).mag();
+//                            direction = PVector.sub(ptOnLine, blobPos);
 //                            direction.div(direction.mag());
 //                            PVector target = new PVector();
 //                            PVector.cross(linePP, linePO, target);

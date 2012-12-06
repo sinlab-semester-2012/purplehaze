@@ -96,7 +96,7 @@ FightingHalosActivity
 Setup and run:
 - Run FightingHalosActivity.pde
 - Point the camera to a blank (uniform) floor, and press the space bar once.
-- 
+- Interact.
 
 Keyboard controls:
 - Space Bar = capture current frame as reference image for blob detection
@@ -118,7 +118,7 @@ To Do / Issues
 - Add coins to collect and pursuing monster to the maze escape.
 - Refine third task.
 
-Previous Protyping Steps
+Previous Prototyping Steps
 ------------------------
 
 Week 1:
