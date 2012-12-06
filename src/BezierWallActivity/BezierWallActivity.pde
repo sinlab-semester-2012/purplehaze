@@ -2,15 +2,16 @@ import codeanticode.gsvideo.*;
 import monclubelec.javacvPro.*;
 
 
-GSCapture cam;
-OpenCV opencv;
+int widthScreen = 1024;
+int heightScreen = 768;
 
 int widthCapture = 640;
 int heightCapture = 480;
 int fpsCapture = 30;
 
+GSCapture cam;
+OpenCV opencv;
 Blob[] blobs;
-BezierWall bezierWall;
 
 int opencvDebugDisplay;
 static final int OCVDD_NONE = 0;
@@ -21,8 +22,10 @@ static final int OCVDD_THRESHOLDED = 4;
 static final int OCVDDSIZE = 5;
 boolean blobDebugDisplay;
 
+BezierWall bezierWall;
+
 void setup() {
-    size(widthCapture, heightCapture);
+    size(widthScreen, heightScreen);
     background(0);
     smooth();
     
@@ -31,11 +34,11 @@ void setup() {
     cam.start();
     opencv = new OpenCV(this);
     opencv.allocate(widthCapture, heightCapture);
-    
-    bezierWall = new BezierWall(2);
-    
+        
     opencvDebugDisplay = OCVDD_NONE;
     blobDebugDisplay = false;
+    
+    bezierWall = new BezierWall(2);
 }
 
 void draw() {
