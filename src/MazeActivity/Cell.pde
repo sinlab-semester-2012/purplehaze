@@ -7,7 +7,7 @@ class Cell {
     boolean topWall;
     boolean leftWall;
     boolean bottomWall;
-    boolean isEntrance;
+    boolean entrance;
     
     Cell(int xInd, int yInd) {
         xIndex = xInd;
@@ -16,7 +16,7 @@ class Cell {
         topWall = true;
         leftWall = true;
         bottomWall = true;
-        isEntrance = false;
+        entrance = false;
     }
     
     Cell(int xInd, int yInd, boolean rightW, boolean topW, boolean leftW, boolean bottomW) {
@@ -26,7 +26,7 @@ class Cell {
         topWall = topW;
         leftWall = leftW;
         bottomWall = bottomW;
-        isEntrance = false;
+        entrance = false;
     }
     
     // get coordinate x index
@@ -87,12 +87,12 @@ class Cell {
     
     // check whether cell is an entrance cell
     boolean isEntrance() {
-        return isEntrance;
+        return entrance;
     }
     
     // set cell as entrance or normal cell
-    void setIsEntrance(boolean isE) {
-        isEntrance = isE;
+    void setEntrance(boolean e) {
+        entrance = e;
     }
 }
 

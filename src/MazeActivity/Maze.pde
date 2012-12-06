@@ -353,7 +353,7 @@ class Maze {
                     y = nbCellsY - 1;
                 }
             } while (cells[x][y].isEntrance());
-            cells[x][y].setIsEntrance(true);
+            cells[x][y].setEntrance(true);
         }
     }
     
@@ -471,7 +471,7 @@ class Maze {
             }
         }
         if (entered) {
-            cells[x][y].setIsEntrance(false);
+            cells[x][y].setEntrance(false);
         }
         return entered;
     }

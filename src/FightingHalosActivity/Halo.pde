@@ -2,6 +2,7 @@
 class Halo {
     
     final float DEFAULT_RADIUS = 0.125*(width + height);
+    final float RADIUS_INCREMENT = DEFAULT_RADIUS/10;
     
     PVector pos;
     float radius;
@@ -21,6 +22,16 @@ class Halo {
     // shoot projectile
     void shoot(PVector direction) {
         
+    }
+    
+    // increase radius
+    void increaseRadius() {
+        radius = radius + RADIUS_INCREMENT;
+    }
+    
+    // decrease radius
+    void decreaseRadius() {
+        radius = min(0, radius - RADIUS_INCREMENT);
     }
     
     // draw halo
