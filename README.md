@@ -90,7 +90,7 @@ Keyboard controls:
 - Space Bar = capture current frame as reference image for blob detection
 - * = toggles blob detection debugging display 
 
-FightingHalosActivity
+FightingHalosActivity (WIP)
 ----------------
 
 Setup and run:
@@ -109,14 +109,11 @@ Development Status
 ==================
 
 Week 12:
-- Code maintenance on first two activities (Bézier & maze).
-- Begun working on third activity (halos).
+- Code maintenance on first activity (Bézier).
 
 To Do / Issues
 --------------
-- Add more interaction to the Bézier wall.
-- Add coins to collect and pursuing monster to the maze escape.
-- Refine third task.
+- Focus now only on Bézier Wall activity (improve interactivity).
 
 Previous Prototyping Steps
 ------------------------
@@ -156,5 +153,9 @@ Week 8:
 
 Week 10:
 - Finished first working version of the maze escape.
+
+Week 12:
+- Code maintenance on first two activities (Bézier & maze).
+- Begun working on third activity (halos).
 
 --------------------------------------------------------------------------------

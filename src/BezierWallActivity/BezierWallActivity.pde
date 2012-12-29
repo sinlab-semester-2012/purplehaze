@@ -2,8 +2,9 @@ import codeanticode.gsvideo.*;
 import monclubelec.javacvPro.*;
 
 
-int widthScreen = 1024;
-int heightScreen = 768;
+int widthScreen = 640;
+int heightScreen = 480;
+int fps = 30;
 
 int widthCapture = 640;
 int heightCapture = 480;
@@ -25,19 +26,23 @@ boolean blobDebugDisplay;
 BezierWall bezierWall;
 
 void setup() {
+    // initialize screen
     size(widthScreen, heightScreen);
     background(0);
     smooth();
+    frameRate(fps);
     
-    frameRate(fpsCapture);
+    // initialize and start cam
     cam = new GSCapture(this, widthCapture, heightCapture, fpsCapture);
     cam.start();
     opencv = new OpenCV(this);
     opencv.allocate(widthCapture, heightCapture);
-        
+    
+    // initialize visual debug variables
     opencvDebugDisplay = OCVDD_NONE;
     blobDebugDisplay = false;
     
+    // initialize Bezier wall
     bezierWall = new BezierWall(2);
 }
 
@@ -45,9 +50,11 @@ void draw() {
     background(0);
     
     if (cam.available()) {
+        // read image from cam
         cam.read();
         opencv.copy(cam.get());
         
+        // blur captured image
         opencv.blur();
         if (opencvDebugDisplay == OCVDD_BLURRED_CAPTURED) {
             image(opencv.image(), 0, 0);
@@ -59,12 +66,14 @@ void draw() {
             fill(255, 255, 0);
             text("reference", 10, 20);
         }
+        // compute absolute difference with current image
         opencv.absDiff();
         if (opencvDebugDisplay == OCVDD_ABS_DIFF) {
             image(opencv.getMemory2(), 0, 0);
             fill(255, 255, 0);
             text("abs diff", 10, 20);
         }
+        // do binary thresholding on image
         opencv.threshold(opencv.Memory2, 0.2, "BINARY");
         if (opencvDebugDisplay == OCVDD_THRESHOLDED) {
             image(opencv.getMemory2(), 0, 0);
@@ -72,6 +81,7 @@ void draw() {
             text("thresholded", 10, 20);
         }
         
+        // detect blobs on thresholded image
         blobs = opencv.blobs(opencv.Memory2, opencv.area()/64, opencv.area(), 10, false, 4096, false);
         
         if (blobDebugDisplay) {
@@ -81,6 +91,7 @@ void draw() {
         }
     }
     
+    // update Bezier wall
     bezierWall.draw();
     bezierWall.move();
     bezierWall.interact(blobs);
