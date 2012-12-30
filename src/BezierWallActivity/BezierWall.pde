@@ -85,7 +85,7 @@ class BezierWall {
         if (!fixedFirstLastPts) {
             genFirstLastPts();
         }
-        if (nbPoints >= 3) {
+        if (nbPoints > MIN_NB_POINTS) {
             genMiddlePts();
         }
     }
@@ -342,25 +342,6 @@ class BezierWall {
                             direction = PVector.sub(pt, blobPos);
                             direction.div(direction.mag());
                             displacement = PVector.mult(direction, NEAREST_MOTION_ELLIPSE_RADIUS - distance);
-                            
-//                            PVector linePP = PVector.sub(new PVector(points[nbPoints-1].x, points[nbPoints-1].y, 0), centerOrigPt);
-//                            PVector linePPNormalized = PVector.div(linePP, linePP.mag());
-//                            PVector linePO = PVector.sub(blobPos, centerOrigPt);
-//                            PVector ptOnLine = PVector.add(centerOrigPt, PVector.mult(linePPNormalized, (PVector.dot(linePO, linePP))/linePP.mag()));
-//                            ellipse(ptOnLine.x, ptOnLine.y, 20, 20);
-//                            
-//                            pt.set(points[indexPt].x, points[indexPt].y, 0);
-//                            
-//                            distance = (PVector.sub(ptOnLine, blobPos)).mag();
-//                            direction = PVector.sub(ptOnLine, blobPos);
-//                            direction.div(direction.mag());
-//                            PVector target = new PVector();
-//                            PVector.cross(linePP, linePO, target);
-//                            if (target.z < 0) {
-//                                direction.x = -direction.x;
-//                                direction.y = -direction.y;
-//                            }
-//                            displacement = PVector.mult(direction, NEAREST_MOTION_ELLIPSE_RADIUS - distance);
                             
                             centerTempPt = PVector.add(centerOrigPt, displacement);
                             centerTempCtrlPt1 = PVector.add(centerOrigCtrlPt1, displacement);
