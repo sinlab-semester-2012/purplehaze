@@ -21,7 +21,7 @@ class BezierWall {
     final float MAX_NOISE_VOLUME_DISTANCE = max(width, height)/2;
     final float MAX_SINE_VOLUME_DISTANCE = min(width, height)/2;
     
-    final float MAX_DISPLACEMENT_DISTANCE = 0.1*(width + height);
+    final float MAX_DISPLACEMENT_DISTANCE = 0.2*(width + height);
     
     final color CURVE_COLOR = color(255);
     final float CURVE_STROKE_WEIGHT = 0.01*(width + height);
@@ -456,13 +456,13 @@ class BezierWall {
         PVector centerOrigPt1, centerOrigPt2;
         PVector centerOrigCtrlPt11, centerOrigCtrlPt12, centerOrigCtrlPt21, centerOrigCtrlPt22;
         PVector blobPosProj, direction, displacement;
-        float distance;
+        float distance, magnitude;
         PVector centerTempPt1, centerTempPt2;
         PVector centerTempCtrlPt11, centerTempCtrlPt12, centerTempCtrlPt21, centerTempCtrlPt22;
         
         for (int i = 0; i < blobs.length; i++) {
-            blobPos = new PVector(blobs[i].centroid.x, blobs[i].centroid.y, 0);
-            //blobPos = new PVector(mouseX, mouseY, 0);
+            //blobPos = new PVector(blobs[i].centroid.x, blobs[i].centroid.y, 0);
+            blobPos = new PVector(mouseX, mouseY, 0);
             nearestMotionCentersPointsIndices = getNearestMotionCentersPointsIndices(blobPos);
             i1 = nearestMotionCentersPointsIndices[0];
             i2 = nearestMotionCentersPointsIndices[1];
@@ -479,8 +479,13 @@ class BezierWall {
                 blobPosProj = getProjection(blobPos, centerOrigPt1, centerOrigPt2);
                 
                 distance = (PVector.sub(blobPosProj, blobPos)).mag();
-                direction = PVector.div(PVector.sub(blobPosProj, blobPos), distance);            
-                displacement = PVector.mult(direction, max(0, MAX_DISPLACEMENT_DISTANCE - distance));
+                direction = PVector.div(PVector.sub(blobPosProj, blobPos), distance);
+                if (distance > MAX_DISPLACEMENT_DISTANCE/2) {
+                    magnitude = max(0, MAX_DISPLACEMENT_DISTANCE - distance);
+                } else {
+                    magnitude = distance;
+                }
+                displacement = PVector.mult(direction, magnitude);
                 
                 centerTempPt1 = PVector.add(centerOrigPt1, displacement);
                 centerTempPt2 = PVector.add(centerOrigPt2, displacement);
