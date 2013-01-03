@@ -31,7 +31,7 @@ class BezierWall {
     PVector[] ctrlPoints;
     float[][] ctrlPointsMotionParams;
     
-    ArrayList<AudioChannel> pinkNoiseChannels;
+    AudioChannel pinkNoiseChannel;
     ArrayList<AudioChannel> sineWaveChannels;
     
     int state;
@@ -88,7 +88,7 @@ class BezierWall {
     
     // initialize sound data
     void initializeSounds() {
-        pinkNoiseChannels = new ArrayList<AudioChannel>();
+        pinkNoiseChannel = new AudioChannel();
         sineWaveChannels = new ArrayList<AudioChannel>();
     }
     
@@ -418,7 +418,7 @@ class BezierWall {
     // play sounds as blobs approach curve
     // (each blob is assigned a combination of pink noise and a sine wave)
     void playSounds(Blob[] blobs) {
-        if (pinkNoiseChannels.size() == 0) {
+        if (pinkNoiseChannel.state != Ess.PLAYING) {
             addPinkNoise();
         }
         if (blobs.length > sineWaveChannels.size()) {
@@ -428,18 +428,16 @@ class BezierWall {
         }
         
         if (blobs.length > 0) {
-            
+            int[] nearestPositionPointsIndices = getNearestPositionPointsIndices(new PVector(blobs[0].centroid.x, blobs[0].centroid.y, 0));
         }
     }
     
     // add pink noise to current audio channels
     void addPinkNoise() {
-        AudioChannel pinkNoiseChannel = new AudioChannel();
         pinkNoiseChannel.initChannel(pinkNoiseChannel.frames(2000));
         PinkNoise pinkNoise = new PinkNoise(0.5);
         pinkNoise.generate(pinkNoiseChannel);
         pinkNoiseChannel.play(Ess.FOREVER);
-        pinkNoiseChannels.add(pinkNoiseChannel);
     }
     
     // add sinewaves to current audio channels
@@ -459,7 +457,6 @@ class BezierWall {
         int indexToRemove = 0;
         for (int i = 0; i < nbWavesToRemove; i++) {
             indexToRemove = floor(random(sineWaveChannels.size()));
-            
             sineWaveChannels.get(indexToRemove).destroy();
             sineWaveChannels.remove(indexToRemove);
         }
@@ -468,14 +465,28 @@ class BezierWall {
     // get sorted array of position points indices - using insertion sort
     // (sorted according to distance from point pt, in increasing order)
     int[] getNearestPositionPointsIndices(PVector pt) {
-        int[] nearestPtsIdcs = new int[nbPoints];
-        float distance;
+        float[] distances = new float[nbPoints];
+        ArrayList<Integer> nearestPosPtsIdcsL = new ArrayList<Integer>();
         
         for (int i = 0; i < nbPoints; i++) {
-            
+            distances[i] = (PVector.sub(points[i], pt)).mag();
+        }
+        nearestPosPtsIdcsL.add(0);
+        for (int j = 1; j < nbPoints; j++) {
+            int count = 0;
+            while (count < nearestPosPtsIdcsL.size() && distances[j] > distances[nearestPosPtsIdcsL.get(count)]) {
+                count++;
+            }
+            nearestPosPtsIdcsL.add(count, j);
         }
         
-        return nearestPtsIdcs;
+        int[] nearestPosPtsIdcs = new int[nbPoints];
+        Iterator<Integer> it = nearestPosPtsIdcsL.iterator();
+        for (int i = 0; i < nbPoints; i++)
+        {
+            nearestPosPtsIdcs[i] = it.next().intValue();
+        }
+        return nearestPosPtsIdcs;
     }
     
     // decrease number of position points
@@ -557,6 +568,11 @@ class BezierWall {
         for (int m = 1; m < nbPoints - 1; m++) {
             fill(0, 255, 0);
             ellipse(points[m].x, points[m].y, 20, 20);
+            fill(255, 255, 0);
+            ellipse(pointsMotionParams[m][2], pointsMotionParams[m][3], 7, 7);
+            fill(255, 255, 0);
+            ellipse(pointsMotionParams[m][4], pointsMotionParams[m][5], 7, 7);
+            
             fill(255, 0, 0);
             ellipse(ctrlPoints[n].x, ctrlPoints[n].y, 10, 10);
             ellipse(ctrlPoints[n + 1].x, ctrlPoints[n + 1].y, 10, 10);
@@ -565,6 +581,13 @@ class BezierWall {
             line(ctrlPoints[n].x, ctrlPoints[n].y, points[m].x, points[m].y);
             line(ctrlPoints[n + 1].x, ctrlPoints[n + 1].y, points[m].x, points[m].y);
             noStroke();
+            fill(255, 0, 255);
+            ellipse(ctrlPointsMotionParams[n][2], ctrlPointsMotionParams[n][3], 7, 7);
+            ellipse(ctrlPointsMotionParams[n + 1][2], ctrlPointsMotionParams[n + 1][3], 7, 7);
+            fill(255, 0, 255);
+            ellipse(ctrlPointsMotionParams[n][4], ctrlPointsMotionParams[n][5], 7, 7);
+            ellipse(ctrlPointsMotionParams[n + 1][4], ctrlPointsMotionParams[n + 1][5], 7, 7);
+            
             n = n + 2;
         }
     }
