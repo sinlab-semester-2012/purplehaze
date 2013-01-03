@@ -18,10 +18,12 @@ class BezierWall {
     
     final int MIN_SINE_WAVE_HZ = 250;
     final int MAX_SINE_WAVE_HZ = 500;
-    final float MAX_NOISE_VOLUME_DISTANCE = max(width, height)/2;
-    final float MAX_SINE_VOLUME_DISTANCE = min(width, height)/2;
+    final float MAX_SINE_VOLUME_DISTANCE = max(width, height)/2;
+    final float MAX_NOISE_VOLUME_DISTANCE = min(width, height)/2;
     
     final float MAX_DISPLACEMENT_DISTANCE = 0.2*(width + height);
+    final int MAX_DISPLACEMENT_DISTANCE_DIV = 256;
+    final float DISPLACEMENT_MAGNITUDE_FACTOR = 0.5;
     
     final color CURVE_COLOR = color(255);
     final float CURVE_STROKE_WEIGHT = 0.01*(width + height);
@@ -480,11 +482,12 @@ class BezierWall {
                 
                 distance = (PVector.sub(blobPosProj, blobPos)).mag();
                 direction = PVector.div(PVector.sub(blobPosProj, blobPos), distance);
-                if (distance > MAX_DISPLACEMENT_DISTANCE/2) {
+                if (distance > MAX_DISPLACEMENT_DISTANCE/MAX_DISPLACEMENT_DISTANCE_DIV) {
                     magnitude = max(0, MAX_DISPLACEMENT_DISTANCE - distance);
                 } else {
-                    magnitude = distance;
+                    magnitude = distance*(MAX_DISPLACEMENT_DISTANCE_DIV - 1);
                 }
+                magnitude = DISPLACEMENT_MAGNITUDE_FACTOR*magnitude;
                 displacement = PVector.mult(direction, magnitude);
                 
                 centerTempPt1 = PVector.add(centerOrigPt1, displacement);
