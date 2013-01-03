@@ -16,12 +16,12 @@ class BezierWall {
     final float CTRL_POINT_MOTION_ELLIPSE_MAX_RADIUS = 0.075*(width + height);
     final float CTRL_POINT_ANGLE_INCREMENT = 0.05;
     
-    final float NEAREST_MOTION_ELLIPSE_RADIUS = 0.1*(width + height);
-    
     final int MIN_SINE_WAVE_HZ = 250;
     final int MAX_SINE_WAVE_HZ = 500;
     final float MAX_NOISE_VOLUME_DISTANCE = max(width, height)/2;
     final float MAX_SINE_VOLUME_DISTANCE = min(width, height)/2;
+    
+    final float MAX_DISPLACEMENT_DISTANCE = 0.1*(width + height);
     
     final color CURVE_COLOR = color(255);
     final float CURVE_STROKE_WEIGHT = 0.01*(width + height);
@@ -393,6 +393,7 @@ class BezierWall {
     }
     
     // change volume of pink noise according to closest blob to curve
+    // (approximate curve with two closest position points)
     void setPinkNoiseVolume(Blob[] blobs) {
         int[] nearestPositionPointsIndices;
         PVector blobPos, pt1, pt2, blobPosProj;
@@ -417,6 +418,7 @@ class BezierWall {
     }
     
     // change volumes of each sine wave according to distance of corresp. blob to curve
+    // (approximate curve with two closest position points)
     void setSineWaveVolumes(Blob[] blobs) {
         int[] nearestPositionPointsIndices;
         PVector blobPos, pt1, pt2, blobPosProj;
@@ -446,13 +448,79 @@ class BezierWall {
     }
     
     // make curve avoid approaching blobs
+    // (approximate curve with two closest motion centers of position points)
     void displaceCurve(Blob[] blobs) {
+        int[] nearestMotionCentersPointsIndices;
+        int i1, i2;
+        PVector blobPos;
+        PVector centerOrigPt1, centerOrigPt2;
+        PVector centerOrigCtrlPt11, centerOrigCtrlPt12, centerOrigCtrlPt21, centerOrigCtrlPt22;
+        PVector blobPosProj, direction, displacement;
+        float distance;
+        PVector centerTempPt1, centerTempPt2;
+        PVector centerTempCtrlPt11, centerTempCtrlPt12, centerTempCtrlPt21, centerTempCtrlPt22;
         
+        for (int i = 0; i < blobs.length; i++) {
+            blobPos = new PVector(blobs[i].centroid.x, blobs[i].centroid.y, 0);
+            //blobPos = new PVector(mouseX, mouseY, 0);
+            nearestMotionCentersPointsIndices = getNearestMotionCentersPointsIndices(blobPos);
+            i1 = nearestMotionCentersPointsIndices[0];
+            i2 = nearestMotionCentersPointsIndices[1];
+            
+            if (i1 != 0 && i2 != 0 && i1 != nbPoints - 1 && i2 != nbPoints - 1) {
+                centerOrigPt1 = new PVector(pointsMotionParams[i1][2], pointsMotionParams[i1][3], 0);
+                centerOrigPt2 = new PVector(pointsMotionParams[i2][2], pointsMotionParams[i2][3], 0);
+                
+                centerOrigCtrlPt11 = new PVector(ctrlPointsMotionParams[2*i1 - 1][2], ctrlPointsMotionParams[2*i1 - 1][3], 0);
+                centerOrigCtrlPt12 = new PVector(ctrlPointsMotionParams[2*i1][2], ctrlPointsMotionParams[2*i1][3], 0);
+                centerOrigCtrlPt21 = new PVector(ctrlPointsMotionParams[2*i2 - 1][2], ctrlPointsMotionParams[2*i2 - 1][3], 0);
+                centerOrigCtrlPt22 = new PVector(ctrlPointsMotionParams[2*i2][2], ctrlPointsMotionParams[2*i2][3], 0);
+                
+                blobPosProj = getProjection(blobPos, centerOrigPt1, centerOrigPt2);
+                
+                distance = (PVector.sub(blobPosProj, blobPos)).mag();
+                direction = PVector.div(PVector.sub(blobPosProj, blobPos), distance);            
+                displacement = PVector.mult(direction, max(0, MAX_DISPLACEMENT_DISTANCE - distance));
+                
+                centerTempPt1 = PVector.add(centerOrigPt1, displacement);
+                centerTempPt2 = PVector.add(centerOrigPt2, displacement);
+                pointsMotionParams[i1][4] = centerTempPt1.x;
+                pointsMotionParams[i1][5] = centerTempPt1.y;
+                pointsMotionParams[i2][4] = centerTempPt2.x;
+                pointsMotionParams[i2][5] = centerTempPt2.y;
+                
+                centerTempCtrlPt11 = PVector.add(centerOrigCtrlPt11, displacement);
+                centerTempCtrlPt12 = PVector.add(centerOrigCtrlPt12, displacement);
+                centerTempCtrlPt21 = PVector.add(centerOrigCtrlPt21, displacement);
+                centerTempCtrlPt22 = PVector.add(centerOrigCtrlPt22, displacement);
+                ctrlPointsMotionParams[2*i1 - 1][4] = centerTempCtrlPt11.x;
+                ctrlPointsMotionParams[2*i1 - 1][5] = centerTempCtrlPt11.y;
+                ctrlPointsMotionParams[2*i1][4] = centerTempCtrlPt12.x;
+                ctrlPointsMotionParams[2*i1][5] = centerTempCtrlPt12.y;
+                ctrlPointsMotionParams[2*i2 - 1][4] = centerTempCtrlPt21.x;
+                ctrlPointsMotionParams[2*i2 - 1][5] = centerTempCtrlPt21.y;
+                ctrlPointsMotionParams[2*i2][4] = centerTempCtrlPt22.x;
+                ctrlPointsMotionParams[2*i2][5] = centerTempCtrlPt22.y;
+            }
+        }
+    }
+    
+    // get projection of point pt0 on line going through pt1 and pt2
+    PVector getProjection(PVector pt0, PVector pt1, PVector pt2) {
+        PVector dir, proj;
+        float magn;
+        
+        dir = PVector.sub(pt2, pt1);
+        dir = PVector.div(dir, dir.mag());
+        magn = PVector.dot(dir, PVector.sub(pt0, pt1));
+        
+        proj = PVector.add(pt1, PVector.mult(dir, magn));
+        return proj;
     }
 
-    // get sorted array of position points indices (using insertion sort)
-    // - sorted according to distance from point pt to each position point
-    // - in increasing order
+    // get sorted array of position points indices (using insertion sort),
+    // sorted according to distance from point pt to each position point,
+    // in increasing order
     int[] getNearestPositionPointsIndices(PVector pt) {
         float[] distances = new float[nbPoints];
         ArrayList<Integer> nearestPosPtsIdcsL = new ArrayList<Integer>();
@@ -479,9 +547,9 @@ class BezierWall {
         return nearestPosPtsIdcs;
     }
     
-    // get sorted array of position points indices (using insertion sort)
-    // - sorted according to distance from point pt to their corresponding motion centers
-    // - in increasing order
+    // get sorted array of position points indices (using insertion sort),
+    // sorted according to distance from point pt to their corresponding motion centers,
+    // in increasing order
     int[] getNearestMotionCentersPointsIndices(PVector pt) {
         float[] distances = new float[nbPoints];
         float xCenterOrig, yCenterOrig;
@@ -511,19 +579,6 @@ class BezierWall {
             i++;
         }
         return nearestMtnCtrsPtsIdcs;
-    }
-    
-    // get projection of point pt0 on line going through pt1 and pt2
-    PVector getProjection(PVector pt0, PVector pt1, PVector pt2) {
-        PVector dir, proj;
-        float magn;
-        
-        dir = PVector.sub(pt2, pt1);
-        dir = PVector.div(dir, dir.mag());
-        magn = PVector.dot(dir, PVector.sub(pt0, pt1));
-        
-        proj = PVector.add(pt1, PVector.mult(dir, magn));
-        return proj;
     }
     
     //--------------------------------------------------------------------------
