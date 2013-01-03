@@ -18,11 +18,11 @@ class BezierWall {
     
     final int MIN_SINE_WAVE_HZ = 250;
     final int MAX_SINE_WAVE_HZ = 500;
-    final float MAX_SINE_VOLUME_DISTANCE = max(width, height)/2;
-    final float MAX_NOISE_VOLUME_DISTANCE = min(width, height)/2;
+    final float MAX_NOISE_VOLUME_DISTANCE = max(width, height)/2;
+    final float MAX_SINE_VOLUME_DISTANCE = min(width, height)/2;
     
     final float MAX_DISPLACEMENT_DISTANCE = 0.2*(width + height);
-    final int MAX_DISPLACEMENT_DISTANCE_DIV = 256;
+    final int MAX_DISPLACEMENT_DISTANCE_DIV = 16;
     final float DISPLACEMENT_MAGNITUDE_FACTOR = 0.5;
     
     final color CURVE_COLOR = color(255);
@@ -463,8 +463,8 @@ class BezierWall {
         PVector centerTempCtrlPt11, centerTempCtrlPt12, centerTempCtrlPt21, centerTempCtrlPt22;
         
         for (int i = 0; i < blobs.length; i++) {
-            //blobPos = new PVector(blobs[i].centroid.x, blobs[i].centroid.y, 0);
-            blobPos = new PVector(mouseX, mouseY, 0);
+            blobPos = new PVector(blobs[i].centroid.x, blobs[i].centroid.y, 0);
+            //blobPos = new PVector(mouseX, mouseY, 0);
             nearestMotionCentersPointsIndices = getNearestMotionCentersPointsIndices(blobPos);
             i1 = nearestMotionCentersPointsIndices[0];
             i2 = nearestMotionCentersPointsIndices[1];
