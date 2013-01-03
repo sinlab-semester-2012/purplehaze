@@ -45,6 +45,7 @@ Setup and Dependencies
 - OpenCV 2.3.1 (http://sourceforge.net/projects/opencvlibrary/)
 - javacvPro (http://www.mon-club-elec.fr/pmwiki_reference_lib_javacvPro/pmwiki.php)
 - GSVideo (http://gsvideo.sourceforge.net/)
+- Ess (http://www.tree-axis.com/Ess/)
 
 
 

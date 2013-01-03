@@ -1,3 +1,4 @@
+import krister.Ess.*;
 
 class BezierWall {
     
@@ -17,6 +18,9 @@ class BezierWall {
     
     final float NEAREST_MOTION_ELLIPSE_RADIUS = 0.1*(width + height);
     
+    final int MIN_SINE_WAVE_HZ = 250;
+    final int MAX_SINE_WAVE_HZ = 500;
+    
     final color CURVE_COLOR = color(255);
     final float CURVE_STROKE_WEIGHT = 0.01*(width + height);
     
@@ -26,6 +30,9 @@ class BezierWall {
     float[][] pointsMotionParams;
     PVector[] ctrlPoints;
     float[][] ctrlPointsMotionParams;
+    
+    ArrayList<AudioChannel> pinkNoiseChannels;
+    ArrayList<AudioChannel> sineWaveChannels;
     
     int state;
     static final int S_INIT = 0;
@@ -49,6 +56,12 @@ class BezierWall {
     
     // initialize data
     void initialize(boolean fixedFirstLastPts) {
+        initializePoints(fixedFirstLastPts);
+        initializeSounds();
+    }
+    
+    // initialize point data
+    void initializePoints(boolean fixedFirstLastPts) {
         PVector tmpFirst = new PVector();
         PVector tmpLast = new PVector();
         if (points != null && fixedFirstLastPts) {
@@ -70,7 +83,13 @@ class BezierWall {
         ctrlPointsMotionParams = new float[nbCtrlPoints][NB_MOTION_PARAMS];
         for (int j = 0; j < nbCtrlPoints; j++) {
             ctrlPoints[j] = new PVector();
-        }
+        }        
+    }
+    
+    // initialize sound data
+    void initializeSounds() {
+        pinkNoiseChannels = new ArrayList<AudioChannel>();
+        sineWaveChannels = new ArrayList<AudioChannel>();
     }
     
     // create Bezier curve
@@ -305,55 +324,62 @@ class BezierWall {
         ctrlPoints[j2] = PVector.add(ctrlPoints[j1], proj);
     }
     
-    // make curve interact with detected blobs
-    // (curve should avoid approaching blobs)
+    // make wall interact with detected blobs
     void interact(Blob[] blobs) {
-        if (blobs != null && blobs.length > 0) {
-            int[] nearestMotionCentersPointsIndices = null;
-            int indexPt, indexCtrlPt1, indexCtrlPt2;
-            PVector blobPos = new PVector();
-            PVector pt = new PVector();
-            PVector centerOrigPt = new PVector();
-            PVector centerOrigCtrlPt1 = new PVector();
-            PVector centerOrigCtrlPt2 = new PVector();
-            PVector centerTempPt, centerTempCtrlPt1, centerTempCtrlPt2;
-            PVector direction, displacement;
-            float distance;
+        if (blobs != null && state == S_RUNNING) {
+            if (blobs.length > 0) {
+                displaceCurve(blobs);
+            }
+            playSounds(blobs);
+        }
+    }
+    
+    // make curve avoid approaching blobs
+    void displaceCurve(Blob[] blobs) {
+        int[] nearestMotionCentersPointsIndices = null;
+        int indexPt, indexCtrlPt1, indexCtrlPt2;
+        PVector blobPos = new PVector();
+        PVector pt = new PVector();
+        PVector centerOrigPt = new PVector();
+        PVector centerOrigCtrlPt1 = new PVector();
+        PVector centerOrigCtrlPt2 = new PVector();
+        PVector centerTempPt, centerTempCtrlPt1, centerTempCtrlPt2;
+        PVector direction, displacement;
+        float distance;
+        
+        for (int i = 0; i < blobs.length; i++) {
+            blobPos.set(blobs[i].centroid.x, blobs[i].centroid.y, 0);
+            //blobPos.set(mouseX, mouseY, 0);
             
-            for (int i = 0; i < blobs.length; i++) {
-                blobPos.set(blobs[i].centroid.x, blobs[i].centroid.y, 0);
-                //blobPos.set(mouseX, mouseY, 0);
-                
-                nearestMotionCentersPointsIndices = getNearestMotionCentersPointsIndices(blobPos);
-                
-                if (nearestMotionCentersPointsIndices != null && nearestMotionCentersPointsIndices.length > 0) {
-                    for (int k = 0; k < nearestMotionCentersPointsIndices.length; k++) {
-                        indexPt = nearestMotionCentersPointsIndices[k];
-                        if (indexPt != 0 && indexPt != nbPoints - 1) {
-                            indexCtrlPt1 = indexPt*2 - 1;
-                            indexCtrlPt2 = indexPt*2;
-                            
-                            centerOrigPt.set(pointsMotionParams[indexPt][2], pointsMotionParams[indexPt][3], 0);
-                            centerOrigCtrlPt1.set(ctrlPointsMotionParams[indexCtrlPt1][2], ctrlPointsMotionParams[indexCtrlPt1][3], 0);
-                            centerOrigCtrlPt2.set(ctrlPointsMotionParams[indexCtrlPt2][2], ctrlPointsMotionParams[indexCtrlPt2][3], 0);
-                            
-                            pt.set(points[indexPt].x, points[indexPt].y, 0);
-                            distance = (PVector.sub(centerOrigPt, blobPos)).mag();
-                            direction = PVector.sub(pt, blobPos);
-                            direction.div(direction.mag());
-                            displacement = PVector.mult(direction, NEAREST_MOTION_ELLIPSE_RADIUS - distance);
-                            
-                            centerTempPt = PVector.add(centerOrigPt, displacement);
-                            centerTempCtrlPt1 = PVector.add(centerOrigCtrlPt1, displacement);
-                            centerTempCtrlPt2 = PVector.add(centerOrigCtrlPt2, displacement);
-                            
-                            pointsMotionParams[indexPt][4] = centerTempPt.x;
-                            pointsMotionParams[indexPt][5] = centerTempPt.y;
-                            ctrlPointsMotionParams[indexCtrlPt1][4] = centerTempCtrlPt1.x;
-                            ctrlPointsMotionParams[indexCtrlPt1][5] = centerTempCtrlPt1.y;
-                            ctrlPointsMotionParams[indexCtrlPt2][4] = centerTempCtrlPt2.x;
-                            ctrlPointsMotionParams[indexCtrlPt2][5] = centerTempCtrlPt2.y;
-                        }
+            nearestMotionCentersPointsIndices = getNearestMotionCentersPointsIndices(blobPos);
+            
+            if (nearestMotionCentersPointsIndices != null && nearestMotionCentersPointsIndices.length > 0) {
+                for (int k = 0; k < nearestMotionCentersPointsIndices.length; k++) {
+                    indexPt = nearestMotionCentersPointsIndices[k];
+                    if (indexPt != 0 && indexPt != nbPoints - 1) {
+                        indexCtrlPt1 = indexPt*2 - 1;
+                        indexCtrlPt2 = indexPt*2;
+                        
+                        centerOrigPt.set(pointsMotionParams[indexPt][2], pointsMotionParams[indexPt][3], 0);
+                        centerOrigCtrlPt1.set(ctrlPointsMotionParams[indexCtrlPt1][2], ctrlPointsMotionParams[indexCtrlPt1][3], 0);
+                        centerOrigCtrlPt2.set(ctrlPointsMotionParams[indexCtrlPt2][2], ctrlPointsMotionParams[indexCtrlPt2][3], 0);
+                        
+                        pt.set(points[indexPt].x, points[indexPt].y, 0);
+                        distance = (PVector.sub(centerOrigPt, blobPos)).mag();
+                        direction = PVector.sub(pt, blobPos);
+                        direction.div(direction.mag());
+                        displacement = PVector.mult(direction, NEAREST_MOTION_ELLIPSE_RADIUS - distance);
+                        
+                        centerTempPt = PVector.add(centerOrigPt, displacement);
+                        centerTempCtrlPt1 = PVector.add(centerOrigCtrlPt1, displacement);
+                        centerTempCtrlPt2 = PVector.add(centerOrigCtrlPt2, displacement);
+                        
+                        pointsMotionParams[indexPt][4] = centerTempPt.x;
+                        pointsMotionParams[indexPt][5] = centerTempPt.y;
+                        ctrlPointsMotionParams[indexCtrlPt1][4] = centerTempCtrlPt1.x;
+                        ctrlPointsMotionParams[indexCtrlPt1][5] = centerTempCtrlPt1.y;
+                        ctrlPointsMotionParams[indexCtrlPt2][4] = centerTempCtrlPt2.x;
+                        ctrlPointsMotionParams[indexCtrlPt2][5] = centerTempCtrlPt2.y;
                     }
                 }
             }
@@ -387,6 +413,69 @@ class BezierWall {
             }
         }
         return nearestMtnCenterPtsIdcs;
+    }
+    
+    // play sounds as blobs approach curve
+    // (each blob is assigned a combination of pink noise and a sine wave)
+    void playSounds(Blob[] blobs) {
+        if (pinkNoiseChannels.size() == 0) {
+            addPinkNoise();
+        }
+        if (blobs.length > sineWaveChannels.size()) {
+            addSineWaves(blobs.length - sineWaveChannels.size());
+        } else if (blobs.length < sineWaveChannels.size()) {
+            removeSineWaves(sineWaveChannels.size() - blobs.length);
+        }
+        
+        if (blobs.length > 0) {
+            
+        }
+    }
+    
+    // add pink noise to current audio channels
+    void addPinkNoise() {
+        AudioChannel pinkNoiseChannel = new AudioChannel();
+        pinkNoiseChannel.initChannel(pinkNoiseChannel.frames(2000));
+        PinkNoise pinkNoise = new PinkNoise(0.5);
+        pinkNoise.generate(pinkNoiseChannel);
+        pinkNoiseChannel.play(Ess.FOREVER);
+        pinkNoiseChannels.add(pinkNoiseChannel);
+    }
+    
+    // add sinewaves to current audio channels
+    void addSineWaves(int nbWavesToAdd) {
+        for (int i = 0; i < nbWavesToAdd; i++) {
+            AudioChannel sineWaveChannel = new AudioChannel();
+            sineWaveChannel.initChannel(sineWaveChannel.frames(2000));
+            SineWave sineWave = new SineWave(floor(random(MIN_SINE_WAVE_HZ, MAX_SINE_WAVE_HZ)), 0.5);
+            sineWave.generate(sineWaveChannel);
+            sineWaveChannel.play(Ess.FOREVER);
+            sineWaveChannels.add(sineWaveChannel);
+        }
+    }
+    
+    // remove sinewaves at random from current audio channels
+    void removeSineWaves(int nbWavesToRemove) {
+        int indexToRemove = 0;
+        for (int i = 0; i < nbWavesToRemove; i++) {
+            indexToRemove = floor(random(sineWaveChannels.size()));
+            
+            sineWaveChannels.get(indexToRemove).destroy();
+            sineWaveChannels.remove(indexToRemove);
+        }
+    }
+    
+    // get sorted array of position points indices - using insertion sort
+    // (sorted according to distance from point pt, in increasing order)
+    int[] getNearestPositionPointsIndices(PVector pt) {
+        int[] nearestPtsIdcs = new int[nbPoints];
+        float distance;
+        
+        for (int i = 0; i < nbPoints; i++) {
+            
+        }
+        
+        return nearestPtsIdcs;
     }
     
     // decrease number of position points

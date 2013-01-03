@@ -1,6 +1,6 @@
 import codeanticode.gsvideo.*;
+import krister.Ess.*;
 import monclubelec.javacvPro.*;
-
 
 int widthScreen = 640;
 int heightScreen = 480;
@@ -41,6 +41,9 @@ void setup() {
     // initialize visual debug variables
     opencvDebugDisplay = OCVDD_NONE;
     blobDebugDisplay = false;
+    
+    // initialize sound manager
+    Ess.start(this);
     
     // initialize Bezier wall
     bezierWall = new BezierWall(2);
