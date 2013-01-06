@@ -90,7 +90,8 @@ void draw() {
         }
         
         // do binary thresholding on image
-        opencv.threshold(opencv.Memory2, 0.2, "BINARY");
+        float binaryThreshold = 0.2;
+        opencv.threshold(opencv.Memory2, binaryThreshold, "BINARY");
         // if corresp. debug mode is on, display thresholed image
         if (opencvDebugDisplay == OCVDD_THRESHOLDED) {
             image(opencv.getMemory2(), 0, 0);
@@ -99,7 +100,13 @@ void draw() {
         }
         
         // detect blobs on thresholded image
-        blobs = opencv.blobs(opencv.Memory2, opencv.area()/64, opencv.area(), 10, false, 4096, false);
+        long minAreaIn = opencv.area()/64;
+        long maxAreaIn = opencv.area();
+        int maxBlobIn = 16;
+        boolean findHolesIn = false;
+        int maxVerticesIn = 4096;
+        boolean debug = false;
+        blobs = opencv.blobs(opencv.Memory2, minAreaIn, maxAreaIn, maxBlobIn, findHolesIn, maxVerticesIn, debug);
         // display blob debug information if needed
         if (blobDebugDisplay) {
             opencv.drawRectBlobs(blobs, 0, 0, 1);
@@ -125,7 +132,9 @@ void toggleBlobDebugDisplay() {
 void keyPressed() {
     if (key == ' ') {
         if (bezierWall.isInInitState()) {
+            // capture reference frame
             opencv.remember();
+            // launch Bezier wall
             bezierWall.launch();
         }
     } else if (key == ENTER || key == RETURN) {

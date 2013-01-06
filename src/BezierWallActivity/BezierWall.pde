@@ -4,7 +4,7 @@ class BezierWall {
     
     //----------CLASS CONSTANTS-------------------------------------------------
     
-    final boolean DEBUG_MOUSE = false;
+    final boolean DEBUG_MOUSE = true;
 
     
     final int MIN_NB_POINTS = 2;
@@ -13,13 +13,16 @@ class BezierWall {
     final float POINT_LOCATION_RANGE = 0.1*(width + height);
     final float CTRL_POINT_LOCATION_RANGE = 0.2*(width + height);
     
-    final int NB_MOTION_PARAMS = 7;
+    final int NB_MOTION_PARAMS = 8;
     final float POINT_MOTION_ELLIPSE_MIN_RADIUS = 0;
     final float POINT_MOTION_ELLIPSE_MAX_RADIUS = 0.025*(width + height);
+    final float POINT_ANGLE_DEFAULT_SPEED_VAR = 1.0;
     final float POINT_ANGLE_INCREMENT = 0.1;
     final float CTRL_POINT_MOTION_ELLIPSE_MIN_RADIUS = 0;
     final float CTRL_POINT_MOTION_ELLIPSE_MAX_RADIUS = 0.075*(width + height);
+    final float CTRL_POINT_ANGLE_DEFAULT_SPEED_VAR = 1.0;
     final float CTRL_POINT_ANGLE_INCREMENT = 0.05;
+    final float ANGLE_PULSE_FACTOR = 0.025;
     
     final float MIN_NOISE_VOLUME = 0.2;
     final int MIN_SINE_WAVE_HZ = 250;
@@ -219,7 +222,7 @@ class BezierWall {
     
     // generate motion parameters for position points
     void genPtsMotionParams() {
-        float a, b, xCenterOrig, yCenterOrig, xCenterTemp, yCenterTemp, theta;
+        float a, b, xCenterOrig, yCenterOrig, xCenterTemp, yCenterTemp, theta, thetaSpeedVar;
         for (int i = 0; i < nbPoints; i++) {
             if (i == 0 || i == nbPoints - 1) {
                 a = 0;
@@ -227,12 +230,14 @@ class BezierWall {
                 theta = 0;
                 xCenterOrig = points[i].x;
                 yCenterOrig = points[i].y;
+                thetaSpeedVar = 0;
             } else {
                 a = random(POINT_MOTION_ELLIPSE_MIN_RADIUS, POINT_MOTION_ELLIPSE_MAX_RADIUS);
                 b = random(POINT_MOTION_ELLIPSE_MIN_RADIUS, POINT_MOTION_ELLIPSE_MAX_RADIUS);
                 theta = random(0, TWO_PI);
                 xCenterOrig = points[i].x - a*cos(theta);
                 yCenterOrig = points[i].y - b*cos(theta);
+                thetaSpeedVar = POINT_ANGLE_DEFAULT_SPEED_VAR;
             }
             xCenterTemp = xCenterOrig;
             yCenterTemp = yCenterOrig;
@@ -244,18 +249,20 @@ class BezierWall {
             pointsMotionParams[i][4] = xCenterTemp;
             pointsMotionParams[i][5] = yCenterTemp;
             pointsMotionParams[i][6] = theta;
+            pointsMotionParams[i][7] = thetaSpeedVar;
         }
     }
     
     // generate motion parameters for control points
     void genCtrlPtsMotionParams() {
-        float a, b, xCenterOrig, yCenterOrig, xCenterTemp, yCenterTemp, theta;
+        float a, b, xCenterOrig, yCenterOrig, xCenterTemp, yCenterTemp, theta, thetaSpeedVar;
         for (int j = 0; j < nbCtrlPoints; j++) {
             a = random(CTRL_POINT_MOTION_ELLIPSE_MIN_RADIUS, CTRL_POINT_MOTION_ELLIPSE_MAX_RADIUS);
             b = random(CTRL_POINT_MOTION_ELLIPSE_MIN_RADIUS, CTRL_POINT_MOTION_ELLIPSE_MAX_RADIUS);
             theta = random(0, TWO_PI);
             xCenterOrig = ctrlPoints[j].x - a*cos(theta);
             yCenterOrig = ctrlPoints[j].y - b*cos(theta);
+            thetaSpeedVar = CTRL_POINT_ANGLE_DEFAULT_SPEED_VAR;
             xCenterTemp = xCenterOrig;
             yCenterTemp = yCenterOrig;
             ctrlPointsMotionParams[j][0] = a;
@@ -265,6 +272,7 @@ class BezierWall {
             ctrlPointsMotionParams[j][4] = xCenterTemp;
             ctrlPointsMotionParams[j][5] = yCenterTemp;
             ctrlPointsMotionParams[j][6] = theta;
+            ctrlPointsMotionParams[j][7] = thetaSpeedVar;
         }        
     }
     
@@ -290,13 +298,14 @@ class BezierWall {
     
     // move single position point
     void movePt(int i) {
-        float a, b, xCenterTemp, yCenterTemp, theta;
+        float a, b, xCenterTemp, yCenterTemp, theta, thetaSpeedVar;
         a = pointsMotionParams[i][0];
         b = pointsMotionParams[i][1];
         xCenterTemp = pointsMotionParams[i][4];
         yCenterTemp = pointsMotionParams[i][5];
         theta = pointsMotionParams[i][6];
-        theta = (theta + POINT_ANGLE_INCREMENT) % TWO_PI;
+        thetaSpeedVar = pointsMotionParams[i][7];
+        theta = (theta + thetaSpeedVar*POINT_ANGLE_INCREMENT) % TWO_PI;
         points[i].set(xCenterTemp + a*cos(theta), yCenterTemp + b*sin(theta), 0);
         pointsMotionParams[i][6] = theta;
     }
@@ -324,13 +333,14 @@ class BezierWall {
     
     // move single control point
     void moveCtrlPt(int j) {
-        float a, b, xCenterTemp, yCenterTemp, theta;
+        float a, b, xCenterTemp, yCenterTemp, theta, thetaSpeedVar;
         a = ctrlPointsMotionParams[j][0];
         b = ctrlPointsMotionParams[j][1];
         xCenterTemp = ctrlPointsMotionParams[j][4];
         yCenterTemp = ctrlPointsMotionParams[j][5];
         theta = ctrlPointsMotionParams[j][6];
-        theta = (theta + CTRL_POINT_ANGLE_INCREMENT) % TWO_PI;
+        thetaSpeedVar = ctrlPointsMotionParams[j][7];
+        theta = (theta + thetaSpeedVar*CTRL_POINT_ANGLE_INCREMENT) % TWO_PI;
         ctrlPoints[j].set(xCenterTemp + a*cos(theta), yCenterTemp + b*sin(theta), 0);
         ctrlPointsMotionParams[j][6] = theta;
     }
@@ -469,7 +479,7 @@ class BezierWall {
         }
     }
     
-    // make curve avoid approaching blobs
+    // make curve try to avoid approaching blobs and pulsate
     // (approximate curve with two closest motion centers of position points)
     void displaceCurve(Blob[] blobs) {
         int[] nearestMotionCentersPointsIndices;
@@ -482,6 +492,7 @@ class BezierWall {
         PVector centerOrigCtrlPt11, centerOrigCtrlPt12, centerTempCtrlPt11, centerTempCtrlPt12;
         PVector centerTempPt2;
         PVector centerOrigCtrlPt21, centerOrigCtrlPt22, centerTempCtrlPt21, centerTempCtrlPt22;
+        float thetaSpeedVar1, thetaSpeedVar2;
         
         for (int i = 0; i < blobs.length; i++) {
             if (DEBUG_MOUSE) {
@@ -495,6 +506,7 @@ class BezierWall {
             
             centerOrigPt1 = new PVector(pointsMotionParams[i1][2], pointsMotionParams[i1][3], 0);
             centerOrigPt2 = new PVector(pointsMotionParams[i2][2], pointsMotionParams[i2][3], 0);
+            
             // get projected blob position on line defined by the two nearest motion centers
             blobPosProj = getProjection(blobPos, centerOrigPt1, centerOrigPt2);
             // compute distance from blob position to projected blob position
@@ -505,7 +517,7 @@ class BezierWall {
             // compute direction of displacement
             direction = PVector.div(PVector.sub(blobPosProj, blobPos), distance);
             // compute magnitude of displacement
-            // (if-else block needed for smooth visual change)
+            // (following computation needed for smooth visual change)
             if (distance > MAX_DISPLACEMENT_DISTANCE/MAX_DISPLACEMENT_DISTANCE_DIV) {
                 magnitude = max(0, MAX_DISPLACEMENT_DISTANCE - distance);
             } else {
@@ -516,6 +528,10 @@ class BezierWall {
             displacement = PVector.mult(direction, magnitude);
             displacement1 = PVector.mult(displacement, distanceRatio1);
             displacement2 = PVector.mult(displacement, distanceRatio2);
+            
+            // compute new speed of curve motion for both points corresponding to each motion center
+            thetaSpeedVar1 = max(1.0, ANGLE_PULSE_FACTOR*distanceRatio1*(MAX_DISPLACEMENT_DISTANCE - distance));
+            thetaSpeedVar2 = max(1.0, ANGLE_PULSE_FACTOR*distanceRatio2*(MAX_DISPLACEMENT_DISTANCE - distance));
             
             // take care of first nearest motion center
             if (i1 != 0 && i1 != nbPoints - 1) {
@@ -533,6 +549,11 @@ class BezierWall {
                 ctrlPointsMotionParams[2*i1 - 1][5] = centerTempCtrlPt11.y;
                 ctrlPointsMotionParams[2*i1][4] = centerTempCtrlPt12.x;
                 ctrlPointsMotionParams[2*i1][5] = centerTempCtrlPt12.y;
+                
+                // change speed of curve motion
+                pointsMotionParams[i1][7] = thetaSpeedVar1;
+                ctrlPointsMotionParams[2*i1 - 1][7] = thetaSpeedVar1;
+                ctrlPointsMotionParams[2*i1][7] = thetaSpeedVar1;
             } else { // first nearest motion center is an end point
                 // move motion center along the x or y axis
                 // (we want to keep it attached to the border)
@@ -542,22 +563,26 @@ class BezierWall {
                 } else if (centerOrigPt1.y == 0 || centerOrigPt1.y == height - 1) {
                     displacementAxisProj.set(displacement1.x, 0, 0);
                 }
-                
                 centerTempPt1 = PVector.add(centerOrigPt1, displacementAxisProj);
                 pointsMotionParams[i1][4] = centerTempPt1.x;
                 pointsMotionParams[i1][5] = centerTempPt1.y;
                 
                 // move motion centers of corresp. control point
+                // and change speed of curve motion for it
                 if (i1 == 0) {
                     centerOrigCtrlPt12 = new PVector(ctrlPointsMotionParams[0][2], ctrlPointsMotionParams[0][3], 0);
                     centerTempCtrlPt12 = PVector.add(centerOrigCtrlPt12, displacement1);
                     ctrlPointsMotionParams[0][4] = centerTempCtrlPt12.x;
                     ctrlPointsMotionParams[0][5] = centerTempCtrlPt12.y;
+                    
+                    ctrlPointsMotionParams[0][7] = thetaSpeedVar1;
                 } else if (i1 == nbPoints - 1) {
                     centerOrigCtrlPt11 = new PVector(ctrlPointsMotionParams[nbCtrlPoints - 1][2], ctrlPointsMotionParams[nbCtrlPoints - 1][3], 0);
                     centerTempCtrlPt11 = PVector.add(centerOrigCtrlPt11, displacement1);
                     ctrlPointsMotionParams[nbCtrlPoints - 1][4] = centerTempCtrlPt11.x;
                     ctrlPointsMotionParams[nbCtrlPoints - 1][5] = centerTempCtrlPt11.y;
+                    
+                    ctrlPointsMotionParams[nbCtrlPoints - 1][7] = thetaSpeedVar1;
                 }
             }
             
@@ -575,6 +600,11 @@ class BezierWall {
                 ctrlPointsMotionParams[2*i2 - 1][5] = centerTempCtrlPt21.y;
                 ctrlPointsMotionParams[2*i2][4] = centerTempCtrlPt22.x;
                 ctrlPointsMotionParams[2*i2][5] = centerTempCtrlPt22.y;
+                
+                // change speed of curve motion
+                pointsMotionParams[i2][7] = thetaSpeedVar2;
+                ctrlPointsMotionParams[2*i2 - 1][7] = thetaSpeedVar2;
+                ctrlPointsMotionParams[2*i2][7] = thetaSpeedVar2;
             } else { // second nearest motion center is an end point
                 // move motion center along the x or y axis
                 // (we want to keep it attached to the border)
@@ -590,16 +620,21 @@ class BezierWall {
                 pointsMotionParams[i2][5] = centerTempPt2.y;
                 
                 // move motion centers of corresp. control point
+                // and change speed of curve motion for it
                 if (i2 == 0) {
                     centerOrigCtrlPt22 = new PVector(ctrlPointsMotionParams[0][2], ctrlPointsMotionParams[0][3], 0);
                     centerTempCtrlPt22 = PVector.add(centerOrigCtrlPt22, displacement2);
                     ctrlPointsMotionParams[0][4] = centerTempCtrlPt22.x;
                     ctrlPointsMotionParams[0][5] = centerTempCtrlPt22.y;
+                    
+                    ctrlPointsMotionParams[0][7] = thetaSpeedVar2;
                 } else if (i2 == nbPoints - 1) {
                     centerOrigCtrlPt21 = new PVector(ctrlPointsMotionParams[nbCtrlPoints - 1][2], ctrlPointsMotionParams[nbCtrlPoints - 1][3], 0);
                     centerTempCtrlPt21 = PVector.add(centerOrigCtrlPt21, displacement2);
                     ctrlPointsMotionParams[nbCtrlPoints - 1][4] = centerTempCtrlPt21.x;
                     ctrlPointsMotionParams[nbCtrlPoints - 1][5] = centerTempCtrlPt21.y;
+                    
+                    ctrlPointsMotionParams[nbCtrlPoints - 1][7] = thetaSpeedVar2;
                 }
             }
         }
