@@ -4,7 +4,7 @@ class BezierWall {
     
     //----------CLASS CONSTANTS-------------------------------------------------
     
-    final boolean DEBUG_MOUSE = true;
+    final boolean DEBUG_MOUSE = false;
 
     
     final int MIN_NB_POINTS = 2;
