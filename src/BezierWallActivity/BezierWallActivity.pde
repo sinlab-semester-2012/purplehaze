@@ -2,8 +2,8 @@ import codeanticode.gsvideo.*;
 import krister.Ess.*;
 import monclubelec.javacvPro.*;
 
-int widthScreen = 640;
-int heightScreen = 480;
+int widthScreen = 800;
+int heightScreen = 600;
 int fps = 30;
 
 int widthCapture = 640;
@@ -11,8 +11,11 @@ int heightCapture = 480;
 int fpsCapture = 30;
 
 GSCapture cam;
+
 OpenCV opencv;
 Blob[] blobs;
+
+BezierWall bezierWall;
 
 int opencvDebugDisplay;
 static final int OCVDD_NONE = 0;
@@ -22,8 +25,6 @@ static final int OCVDD_ABS_DIFF = 3;
 static final int OCVDD_THRESHOLDED = 4;
 static final int OCVDDSIZE = 5;
 boolean blobDebugDisplay;
-
-BezierWall bezierWall;
 
 void setup() {
     // initialize screen
@@ -35,8 +36,10 @@ void setup() {
     // initialize and start cam
     cam = new GSCapture(this, widthCapture, heightCapture, fpsCapture);
     cam.start();
+    
+    // initialize OpenCV
     opencv = new OpenCV(this);
-    opencv.allocate(widthCapture, heightCapture);
+    opencv.allocate(widthScreen, heightScreen);
     
     // initialize visual debug variables
     opencvDebugDisplay = OCVDD_NONE;
@@ -55,29 +58,40 @@ void draw() {
     if (cam.available()) {
         // read image from cam
         cam.read();
-        opencv.copy(cam.get());
+        
+        // copy resized image to OpenCV
+        PImage camImgResized = cam.get();
+        camImgResized.resize(widthScreen, heightScreen);
+        opencv.copy(camImgResized);
         
         // blur captured image
         opencv.blur();
+        // if corresp. debug mode is on, display blurred image
         if (opencvDebugDisplay == OCVDD_BLURRED_CAPTURED) {
             image(opencv.image(), 0, 0);
             fill(255, 255, 0);
-            text("blurred captured", 10, 20);
+            text("blurred", 10, 20);
         }
+        
+        // if corresp. debug mode is on, display reference image
         if (opencvDebugDisplay == OCVDD_REFRERENCE) {
             image(opencv.getMemory(), 0, 0);
             fill(255, 255, 0);
             text("reference", 10, 20);
         }
+        
         // compute absolute difference with current image
         opencv.absDiff();
+        // if corresp. debug mode is on, display abs diff image
         if (opencvDebugDisplay == OCVDD_ABS_DIFF) {
             image(opencv.getMemory2(), 0, 0);
             fill(255, 255, 0);
             text("abs diff", 10, 20);
         }
+        
         // do binary thresholding on image
         opencv.threshold(opencv.Memory2, 0.2, "BINARY");
+        // if corresp. debug mode is on, display thresholed image
         if (opencvDebugDisplay == OCVDD_THRESHOLDED) {
             image(opencv.getMemory2(), 0, 0);
             fill(255, 255, 0);
@@ -86,7 +100,7 @@ void draw() {
         
         // detect blobs on thresholded image
         blobs = opencv.blobs(opencv.Memory2, opencv.area()/64, opencv.area(), 10, false, 4096, false);
-        
+        // display blob debug information if needed
         if (blobDebugDisplay) {
             opencv.drawRectBlobs(blobs, 0, 0, 1);
             opencv.drawBlobs(blobs, 0, 0, 1 );
