@@ -31,7 +31,6 @@ task), and a lighthearted fight based on halos of light (confrontative task).
 Contents
 ========
 
-- doc: extra documentation
 - src: application code
 
 See the Wiki page for more details about the code.
@@ -51,6 +50,11 @@ Setup and Dependencies
 
 Instructions
 ============
+
+The activities are meant to be run in a smoke-filled room, on a computer 
+connected to a projector attached to the ceiling and pointed towards the 
+ground, and to a webcam that captures the scene also from above. The projector 
+and the camera should ideally cover the same area.
 
 Each activity has a dedicated folder. In each folder, you will find the main 
 Processing sketch to run (the one with the same name as the folder) and 
@@ -74,7 +78,7 @@ Keyboard controls:
 - / = toggles OpenCV debugging display 
 - * = toggles blob detection debugging display 
 
-MazeActivity
+MazeActivity (Unfinished)
 ----------------
 
 Setup and run:
@@ -91,7 +95,7 @@ Keyboard controls:
 - Space Bar = capture current frame as reference image for blob detection
 - * = toggles blob detection debugging display 
 
-FightingHalosActivity (WIP)
+FightingHalosActivity (Unfinished, Code Skeleton)
 ----------------
 
 Setup and run:
@@ -108,9 +112,6 @@ Keyboard controls:
 
 Development Status
 ==================
-
-Week 12:
-- Code maintenance on first activity (Bézier).
 
 To Do / Issues
 --------------
@@ -158,5 +159,8 @@ Week 10:
 Week 12:
 - Code maintenance on first two activities (Bézier & maze).
 - Begun working on third activity (halos).
+
+Week 14:
+- Focus now only on Bézier Wall activity (improve interactivity).
 
 --------------------------------------------------------------------------------

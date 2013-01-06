@@ -2,6 +2,11 @@ import krister.Ess.*;
 
 class BezierWall {
     
+    //----------CLASS CONSTANTS-------------------------------------------------
+    
+    final boolean DEBUG_MOUSE = false;
+
+    
     final int MIN_NB_POINTS = 2;
     final int MAX_NB_POINTS = 7;
     
@@ -16,6 +21,7 @@ class BezierWall {
     final float CTRL_POINT_MOTION_ELLIPSE_MAX_RADIUS = 0.075*(width + height);
     final float CTRL_POINT_ANGLE_INCREMENT = 0.05;
     
+    final float MIN_NOISE_VOLUME = 0.2;
     final int MIN_SINE_WAVE_HZ = 250;
     final int MAX_SINE_WAVE_HZ = 500;
     final float MAX_NOISE_VOLUME_DISTANCE = max(width, height)/2;
@@ -23,10 +29,12 @@ class BezierWall {
     
     final float MAX_DISPLACEMENT_DISTANCE = 0.2*(width + height);
     final int MAX_DISPLACEMENT_DISTANCE_DIV = 16;
-    final float DISPLACEMENT_MAGNITUDE_FACTOR = 0.5;
+    final float DISPLACEMENT_MAGNITUDE_FACTOR = 0.75;
     
     final color CURVE_COLOR = color(255);
     final float CURVE_STROKE_WEIGHT = 0.01*(width + height);
+    
+    //----------CLASS ATTRIBUTES------------------------------------------------
     
     int nbPoints;
     int nbCtrlPoints;
@@ -44,6 +52,8 @@ class BezierWall {
     static final int SSIZE = 2;
     
     boolean debugDisplay;
+
+    //----------CONSTRUCTION, INTIALIZATION AND GENERATION------------------
 
     BezierWall(int nbP) {
         nbPoints = max(MIN_NB_POINTS, min(nbP, MAX_NB_POINTS));
@@ -118,11 +128,11 @@ class BezierWall {
         float r = random(0, 1);
         
         if (r < 0.5) {
-            points[0].set(0, random(0, height), 0);
-            points[nbPoints-1].set(width, random(0, height), 0);
+            points[0].set(0, floor(random(0, height)), 0);
+            points[nbPoints-1].set(width - 1, floor(random(0, height)), 0);
         } else {
-            points[0].set(random(0, width), 0, 0);
-            points[nbPoints-1].set(random(0, width), height, 0);
+            points[0].set(floor(random(0, width)), 0, 0);
+            points[nbPoints-1].set(floor(random(0, width)), height - 1, 0);
         }
     }
     
@@ -258,7 +268,7 @@ class BezierWall {
         }        
     }
     
-    //--------------------------------------------------------------------------
+    //----------CURVE MOVEMENT--------------------------------------------------
     
     // animate Bezier curve
     void move() {
@@ -267,8 +277,12 @@ class BezierWall {
     }
     
     // make position points move on their ellipse trajectories
-    // (except for the first and last one)
+    // (except for the first and last one, for which we set to 
+    // their position to their ellipse center but make them not 
+    // move)
     void movePts() {
+        points[0].set(pointsMotionParams[0][4], pointsMotionParams[0][5], 0);
+        points[nbPoints - 1].set(pointsMotionParams[nbPoints - 1][4], pointsMotionParams[nbPoints - 1][5], 0);
         for (int i = 1; i < nbPoints - 1; i++) {
             movePt(i);
         }
@@ -330,7 +344,7 @@ class BezierWall {
         ctrlPoints[j2] = PVector.add(ctrlPoints[j1], proj);
     }
     
-    //--------------------------------------------------------------------------
+    //----------CURVE INTERACTION-----------------------------------------------
     
     // make wall interact with detected blobs
     void interact(Blob[] blobs) {
@@ -361,7 +375,7 @@ class BezierWall {
         pinkNoiseChannel.initChannel(pinkNoiseChannel.frames(2000));
         PinkNoise pinkNoise = new PinkNoise(1.0);
         pinkNoise.generate(pinkNoiseChannel);
-        pinkNoiseChannel.volume(0.5);
+        pinkNoiseChannel.volume(MIN_NOISE_VOLUME);
         pinkNoiseChannel.play(Ess.FOREVER);
     }
     
@@ -372,7 +386,7 @@ class BezierWall {
             sineWaveChannel.initChannel(sineWaveChannel.frames(2000));
             SineWave sineWave = new SineWave(floor(random(MIN_SINE_WAVE_HZ, MAX_SINE_WAVE_HZ)), 1.0);
             sineWave.generate(sineWaveChannel);
-            sineWaveChannel.volume(0.5);
+            sineWaveChannel.volume(0.0);
             sineWaveChannel.play(Ess.FOREVER);
             sineWaveChannels.add(sineWaveChannel);
         }
@@ -403,8 +417,11 @@ class BezierWall {
         float volume;
         
         for (int i = 0; i < blobs.length; i++) {
-            blobPos = new PVector(blobs[i].centroid.x, blobs[i].centroid.y, 0);
-            //blobPos = new PVector(mouseX, mouseY, 0);
+            if (DEBUG_MOUSE) {
+                blobPos = new PVector(mouseX, mouseY, 0);
+            } else {
+                blobPos = new PVector(blobs[i].centroid.x, blobs[i].centroid.y, 0);
+            }
             nearestPositionPointsIndices = getNearestPositionPointsIndices(blobPos);
             pt1 = points[nearestPositionPointsIndices[0]];
             pt2 = points[nearestPositionPointsIndices[1]];
@@ -415,7 +432,7 @@ class BezierWall {
             }
         }
         
-        volume = max(0, (MAX_NOISE_VOLUME_DISTANCE - minDistance)/MAX_NOISE_VOLUME_DISTANCE);
+        volume = max(MIN_NOISE_VOLUME, (MAX_NOISE_VOLUME_DISTANCE - minDistance)/MAX_NOISE_VOLUME_DISTANCE);
         pinkNoiseChannel.volume(volume);
     }
     
@@ -428,8 +445,11 @@ class BezierWall {
         float volume;
         
         for (int i = 0; i < blobs.length; i++) {
-            blobPos = new PVector(blobs[i].centroid.x, blobs[i].centroid.y, 0);
-            //blobPos = new PVector(mouseX, mouseY, 0);
+            if (DEBUG_MOUSE) {
+                blobPos = new PVector(mouseX, mouseY, 0);
+            } else {
+                blobPos = new PVector(blobs[i].centroid.x, blobs[i].centroid.y, 0);
+            }
             nearestPositionPointsIndices = getNearestPositionPointsIndices(blobPos);
             pt1 = points[nearestPositionPointsIndices[0]];
             pt2 = points[nearestPositionPointsIndices[1]];
@@ -456,59 +476,131 @@ class BezierWall {
         int i1, i2;
         PVector blobPos;
         PVector centerOrigPt1, centerOrigPt2;
-        PVector centerOrigCtrlPt11, centerOrigCtrlPt12, centerOrigCtrlPt21, centerOrigCtrlPt22;
-        PVector blobPosProj, direction, displacement;
-        float distance, magnitude;
-        PVector centerTempPt1, centerTempPt2;
-        PVector centerTempCtrlPt11, centerTempCtrlPt12, centerTempCtrlPt21, centerTempCtrlPt22;
+        PVector blobPosProj, direction, displacement, displacement1, displacement2, displacementAxisProj;
+        float distance, distanceRatio1, distanceRatio2, magnitude;
+        PVector centerTempPt1;
+        PVector centerOrigCtrlPt11, centerOrigCtrlPt12, centerTempCtrlPt11, centerTempCtrlPt12;
+        PVector centerTempPt2;
+        PVector centerOrigCtrlPt21, centerOrigCtrlPt22, centerTempCtrlPt21, centerTempCtrlPt22;
         
         for (int i = 0; i < blobs.length; i++) {
-            blobPos = new PVector(blobs[i].centroid.x, blobs[i].centroid.y, 0);
-            //blobPos = new PVector(mouseX, mouseY, 0);
+            if (DEBUG_MOUSE) {
+                blobPos = new PVector(mouseX, mouseY, 0);
+            } else {
+                blobPos = new PVector(blobs[i].centroid.x, blobs[i].centroid.y, 0);
+            }
             nearestMotionCentersPointsIndices = getNearestMotionCentersPointsIndices(blobPos);
             i1 = nearestMotionCentersPointsIndices[0];
             i2 = nearestMotionCentersPointsIndices[1];
             
-            if (i1 != 0 && i2 != 0 && i1 != nbPoints - 1 && i2 != nbPoints - 1) {
-                centerOrigPt1 = new PVector(pointsMotionParams[i1][2], pointsMotionParams[i1][3], 0);
-                centerOrigPt2 = new PVector(pointsMotionParams[i2][2], pointsMotionParams[i2][3], 0);
-                
-                centerOrigCtrlPt11 = new PVector(ctrlPointsMotionParams[2*i1 - 1][2], ctrlPointsMotionParams[2*i1 - 1][3], 0);
-                centerOrigCtrlPt12 = new PVector(ctrlPointsMotionParams[2*i1][2], ctrlPointsMotionParams[2*i1][3], 0);
-                centerOrigCtrlPt21 = new PVector(ctrlPointsMotionParams[2*i2 - 1][2], ctrlPointsMotionParams[2*i2 - 1][3], 0);
-                centerOrigCtrlPt22 = new PVector(ctrlPointsMotionParams[2*i2][2], ctrlPointsMotionParams[2*i2][3], 0);
-                
-                blobPosProj = getProjection(blobPos, centerOrigPt1, centerOrigPt2);
-                
-                distance = (PVector.sub(blobPosProj, blobPos)).mag();
-                direction = PVector.div(PVector.sub(blobPosProj, blobPos), distance);
-                if (distance > MAX_DISPLACEMENT_DISTANCE/MAX_DISPLACEMENT_DISTANCE_DIV) {
-                    magnitude = max(0, MAX_DISPLACEMENT_DISTANCE - distance);
-                } else {
-                    magnitude = distance*(MAX_DISPLACEMENT_DISTANCE_DIV - 1);
-                }
-                magnitude = DISPLACEMENT_MAGNITUDE_FACTOR*magnitude;
-                displacement = PVector.mult(direction, magnitude);
-                
-                centerTempPt1 = PVector.add(centerOrigPt1, displacement);
-                centerTempPt2 = PVector.add(centerOrigPt2, displacement);
+            centerOrigPt1 = new PVector(pointsMotionParams[i1][2], pointsMotionParams[i1][3], 0);
+            centerOrigPt2 = new PVector(pointsMotionParams[i2][2], pointsMotionParams[i2][3], 0);
+            // get projected blob position on line defined by the two nearest motion centers
+            blobPosProj = getProjection(blobPos, centerOrigPt1, centerOrigPt2);
+            // compute distance from blob position to projected blob position
+            distance = (PVector.sub(blobPosProj, blobPos)).mag();
+            // compute distance ratios that will influence displacement magnitude for each motion center
+            distanceRatio1 = (PVector.sub(centerOrigPt2, blobPosProj)).mag()/(PVector.sub(centerOrigPt1, centerOrigPt2)).mag();
+            distanceRatio2 = (PVector.sub(centerOrigPt1, blobPosProj)).mag()/(PVector.sub(centerOrigPt1, centerOrigPt2)).mag();
+            // compute direction of displacement
+            direction = PVector.div(PVector.sub(blobPosProj, blobPos), distance);
+            // compute magnitude of displacement
+            // (if-else block needed for smooth visual change)
+            if (distance > MAX_DISPLACEMENT_DISTANCE/MAX_DISPLACEMENT_DISTANCE_DIV) {
+                magnitude = max(0, MAX_DISPLACEMENT_DISTANCE - distance);
+            } else {
+                magnitude = distance*(MAX_DISPLACEMENT_DISTANCE_DIV - 1);
+            }
+            magnitude = DISPLACEMENT_MAGNITUDE_FACTOR*magnitude;
+            // compute general displacement, and specific displacements for both motion centers
+            displacement = PVector.mult(direction, magnitude);
+            displacement1 = PVector.mult(displacement, distanceRatio1);
+            displacement2 = PVector.mult(displacement, distanceRatio2);
+            
+            // take care of first nearest motion center
+            if (i1 != 0 && i1 != nbPoints - 1) {
+                // move motion center
+                centerTempPt1 = PVector.add(centerOrigPt1, displacement1);
                 pointsMotionParams[i1][4] = centerTempPt1.x;
                 pointsMotionParams[i1][5] = centerTempPt1.y;
-                pointsMotionParams[i2][4] = centerTempPt2.x;
-                pointsMotionParams[i2][5] = centerTempPt2.y;
                 
-                centerTempCtrlPt11 = PVector.add(centerOrigCtrlPt11, displacement);
-                centerTempCtrlPt12 = PVector.add(centerOrigCtrlPt12, displacement);
-                centerTempCtrlPt21 = PVector.add(centerOrigCtrlPt21, displacement);
-                centerTempCtrlPt22 = PVector.add(centerOrigCtrlPt22, displacement);
+                // move motion centers of corresp. control points
+                centerOrigCtrlPt11 = new PVector(ctrlPointsMotionParams[2*i1 - 1][2], ctrlPointsMotionParams[2*i1 - 1][3], 0);
+                centerOrigCtrlPt12 = new PVector(ctrlPointsMotionParams[2*i1][2], ctrlPointsMotionParams[2*i1][3], 0);
+                centerTempCtrlPt11 = PVector.add(centerOrigCtrlPt11, displacement1);
+                centerTempCtrlPt12 = PVector.add(centerOrigCtrlPt12, displacement1);
                 ctrlPointsMotionParams[2*i1 - 1][4] = centerTempCtrlPt11.x;
                 ctrlPointsMotionParams[2*i1 - 1][5] = centerTempCtrlPt11.y;
                 ctrlPointsMotionParams[2*i1][4] = centerTempCtrlPt12.x;
                 ctrlPointsMotionParams[2*i1][5] = centerTempCtrlPt12.y;
+            } else { // first nearest motion center is an end point
+                // move motion center along the x or y axis
+                // (we want to keep it attached to the border)
+                displacementAxisProj = new PVector();
+                if (centerOrigPt1.x == 0 || centerOrigPt1.x == width - 1) {
+                    displacementAxisProj.set(0, displacement1.y, 0);
+                } else if (centerOrigPt1.y == 0 || centerOrigPt1.y == height - 1) {
+                    displacementAxisProj.set(displacement1.x, 0, 0);
+                }
+                
+                centerTempPt1 = PVector.add(centerOrigPt1, displacementAxisProj);
+                pointsMotionParams[i1][4] = centerTempPt1.x;
+                pointsMotionParams[i1][5] = centerTempPt1.y;
+                
+                // move motion centers of corresp. control point
+                if (i1 == 0) {
+                    centerOrigCtrlPt12 = new PVector(ctrlPointsMotionParams[0][2], ctrlPointsMotionParams[0][3], 0);
+                    centerTempCtrlPt12 = PVector.add(centerOrigCtrlPt12, displacement1);
+                    ctrlPointsMotionParams[0][4] = centerTempCtrlPt12.x;
+                    ctrlPointsMotionParams[0][5] = centerTempCtrlPt12.y;
+                } else if (i1 == nbPoints - 1) {
+                    centerOrigCtrlPt11 = new PVector(ctrlPointsMotionParams[nbCtrlPoints - 1][2], ctrlPointsMotionParams[nbCtrlPoints - 1][3], 0);
+                    centerTempCtrlPt11 = PVector.add(centerOrigCtrlPt11, displacement1);
+                    ctrlPointsMotionParams[nbCtrlPoints - 1][4] = centerTempCtrlPt11.x;
+                    ctrlPointsMotionParams[nbCtrlPoints - 1][5] = centerTempCtrlPt11.y;
+                }
+            }
+            
+            // take care of second nearest motion center
+            if (i2 != 0 && i2 != nbPoints - 1) {
+                centerTempPt2 = PVector.add(centerOrigPt2, displacement2);
+                pointsMotionParams[i2][4] = centerTempPt2.x;
+                pointsMotionParams[i2][5] = centerTempPt2.y;
+                
+                centerOrigCtrlPt21 = new PVector(ctrlPointsMotionParams[2*i2 - 1][2], ctrlPointsMotionParams[2*i2 - 1][3], 0);
+                centerOrigCtrlPt22 = new PVector(ctrlPointsMotionParams[2*i2][2], ctrlPointsMotionParams[2*i2][3], 0);
+                centerTempCtrlPt21 = PVector.add(centerOrigCtrlPt21, displacement2);
+                centerTempCtrlPt22 = PVector.add(centerOrigCtrlPt22, displacement2);
                 ctrlPointsMotionParams[2*i2 - 1][4] = centerTempCtrlPt21.x;
                 ctrlPointsMotionParams[2*i2 - 1][5] = centerTempCtrlPt21.y;
                 ctrlPointsMotionParams[2*i2][4] = centerTempCtrlPt22.x;
                 ctrlPointsMotionParams[2*i2][5] = centerTempCtrlPt22.y;
+            } else { // second nearest motion center is an end point
+                // move motion center along the x or y axis
+                // (we want to keep it attached to the border)
+                displacementAxisProj = new PVector();
+                if (centerOrigPt2.x == 0 || centerOrigPt2.x == width - 1) {
+                    displacementAxisProj.set(0, displacement2.y, 0);
+                } else if (centerOrigPt2.y == 0 || centerOrigPt2.y == height - 1) {
+                    displacementAxisProj.set(displacement2.x, 0, 0);
+                }
+                
+                centerTempPt2 = PVector.add(centerOrigPt2, displacementAxisProj);
+                pointsMotionParams[i2][4] = centerTempPt2.x;
+                pointsMotionParams[i2][5] = centerTempPt2.y;
+                
+                // move motion centers of corresp. control point
+                if (i2 == 0) {
+                    centerOrigCtrlPt22 = new PVector(ctrlPointsMotionParams[0][2], ctrlPointsMotionParams[0][3], 0);
+                    centerTempCtrlPt22 = PVector.add(centerOrigCtrlPt22, displacement2);
+                    ctrlPointsMotionParams[0][4] = centerTempCtrlPt22.x;
+                    ctrlPointsMotionParams[0][5] = centerTempCtrlPt22.y;
+                } else if (i2 == nbPoints - 1) {
+                    centerOrigCtrlPt21 = new PVector(ctrlPointsMotionParams[nbCtrlPoints - 1][2], ctrlPointsMotionParams[nbCtrlPoints - 1][3], 0);
+                    centerTempCtrlPt21 = PVector.add(centerOrigCtrlPt21, displacement2);
+                    ctrlPointsMotionParams[nbCtrlPoints - 1][4] = centerTempCtrlPt21.x;
+                    ctrlPointsMotionParams[nbCtrlPoints - 1][5] = centerTempCtrlPt21.y;
+                }
             }
         }
     }
@@ -589,7 +681,7 @@ class BezierWall {
         return nearestMtnCtrsPtsIdcs;
     }
     
-    //--------------------------------------------------------------------------
+    //----------CURVE PROPERTIES METHODS----------------------------------------
     
     // decrease number of position points
     void decreaseNbPoints() {
@@ -619,7 +711,7 @@ class BezierWall {
         }
     }
     
-    //--------------------------------------------------------------------------
+    //----------CURVE REGENERATION----------------------------------------------
     
     // regenerate curve
     void reset() {
@@ -630,7 +722,7 @@ class BezierWall {
         generate(fixedFirstLastPts);
     }
     
-    //--------------------------------------------------------------------------
+    //----------CURVE STATE METHODS---------------------------------------------
     
     // launch activity (set to running state so that curve is displayed)
     void launch() {
@@ -642,14 +734,14 @@ class BezierWall {
         return (state == S_INIT);
     }
     
-    //--------------------------------------------------------------------------
+    //----------VISUAL DEBUGGING DISPLAY METHODS--------------------------------
     
     // toggle graphical debug informations
     void toggleDebugDisplay() {
         debugDisplay = !debugDisplay;
     }
     
-    //--------------------------------------------------------------------------
+    //----------DRAW METHODS----------------------------------------------------
     
     // draw Bezier curve on screen
     void draw() {
