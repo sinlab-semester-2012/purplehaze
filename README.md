@@ -26,12 +26,17 @@ each exploring different aspects of structure interaction: the taming of a
 dynamic Bézier curve (collaborative task), a playful maze escape (individual 
 task), and a lighthearted fight based on halos of light (confrontative task).
 
+You might be interested in the following presentation videos:
+- Mid-semester presentation: http://www.youtube.com/watch?v=iN0YAy5bFpE
+- End-semester presentation: http://www.youtube.com/watch?v=4D_Fkj3j8Y4
+- Final Presentation: 
 
 
 Contents
 ========
 
 - src: application code
+- README.md: this readme file
 
 See the Wiki page for more details about the code.
 
@@ -42,19 +47,19 @@ Setup and Dependencies
 
 - Processing 1.5.1 (http://processing.org/)
 - OpenCV 2.3.1 (http://sourceforge.net/projects/opencvlibrary/)
-- javacvPro (http://www.mon-club-elec.fr/pmwiki_reference_lib_javacvPro/pmwiki.php)
-- GSVideo (http://gsvideo.sourceforge.net/)
-- Ess (http://www.tree-axis.com/Ess/)
+- javacvPro 0.5 (http://www.mon-club-elec.fr/pmwiki_reference_lib_javacvPro/pmwiki.php)
+- GSVideo 1.0.0 (http://gsvideo.sourceforge.net/)
+- Ess r2 (http://www.tree-axis.com/Ess/)
 
-
+Note that this was programmed and tested on a Windows 7 computer.
 
 Instructions
 ============
 
-The activities are meant to be run in a smoke-filled room, on a computer 
-connected to a projector attached to the ceiling and pointed towards the 
-ground, and to a webcam that captures the scene also from above. The projector 
-and the camera should ideally cover the same area.
+The activities are meant to be experimented in a smoke-filled room. They 
+should be run on computer connected to a projector (attached to the ceiling 
+and pointed towards the ground) and a webcam (capturing the scene, also from 
+above). The projector and the camera should ideally cover the same area.
 
 Each activity has a dedicated folder. In each folder, you will find the main 
 Processing sketch to run (the one with the same name as the folder) and 
@@ -67,7 +72,11 @@ Setup and run:
 - Run BezierWall.pde
 - Point the camera to a blank (uniform) floor, and press the space bar once.
 - The Bézier wall will appear and move.
-- Step in front of the camera and interact with the curve.
+- Step in front of the camera and interact with the wall. It will try to 
+avoid participants and pulsate more and more as they approach. This will 
+also be reflected through sound. Each participant will be represented as
+a sine wave, and the wall as pink noise. The volume of each audio component 
+will change as participants come near the wall.
 
 Keyboard controls:
 - Space Bar = capture current frame as reference image for blob detection
@@ -115,11 +124,11 @@ Keyboard controls:
 Development Status
 ==================
 
-To Do / Issues
---------------
-- Focus now only on Bézier Wall activity (improve interactivity).
+My contribution to this project is now over, but anyone interested in 
+continuing or building on my work is encouraged to do so and contact 
+SINLAB (http://www.sinlab.ch/) about it.
 
-Previous Prototyping Steps
+History
 ------------------------
 
 Week 1:
@@ -145,13 +154,13 @@ Week 6:
 - Finished first working version of the dynamic Bézier wall.
 
 Week 7:
-- First version of dynamic Bézier curve/wall fully working 
+- First version of dynamic Bézier curve/wall fully working .
 - Additional refinements on dynamic Bézier curve/wall (adding debugging display,
-preparing for some refactoring, working on enhanced interaction)
+preparing for some refactoring, working on enhanced interaction).
 - Working on the second idea, the maze escape (currently on maze generation step).
 
 Week 8:
-- Mid-semester presentation
+- Mid-semester presentation (http://www.youtube.com/watch?v=iN0YAy5bFpE).
 - Working on enhancing interaction in Bézier curve activity.
 - Working on the second idea, the maze escape (currently on maze generation step).
 
@@ -161,8 +170,14 @@ Week 10:
 Week 12:
 - Code maintenance on first two activities (Bézier & maze).
 - Begun working on third activity (halos).
+- End-semester presentation (http://www.youtube.com/watch?v=4D_Fkj3j8Y4).
 
 Week 14:
 - Focus now only on Bézier Wall activity (improve interactivity).
+
+Week 17:
+- Improved Bézier Wall visual interactivity, and added an audio component to it.
+- This concludes the final version of the code.
+- Final presentation ().
 
 --------------------------------------------------------------------------------
