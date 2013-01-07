@@ -72,6 +72,8 @@ Setup and run:
 Keyboard controls:
 - Space Bar = capture current frame as reference image for blob detection
 - Enter/Return Key = randomly generate another curve
+- 0 = toggles fixation of endpoints (if on, endpoints stay the same when 
+regenerating curve or changing number of position points)
 - - = decrease the number of position points
 - + = increase the number of position points
 - . = toggles Bézier curve debugging display 

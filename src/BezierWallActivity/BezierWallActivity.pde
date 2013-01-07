@@ -139,6 +139,8 @@ void keyPressed() {
         }
     } else if (key == ENTER || key == RETURN) {
         bezierWall.reset();
+    } else if (key == '0') {
+        bezierWall.toggleFixedFirstLastPts();
     } else if (key == '-') {
         bezierWall.decreaseNbPoints();
     } else if (key == '+') {

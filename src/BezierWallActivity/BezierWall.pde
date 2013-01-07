@@ -41,6 +41,7 @@ class BezierWall {
     
     int nbPoints;
     int nbCtrlPoints;
+    boolean fixedFirstLastPts;
     PVector[] points;
     float[][] pointsMotionParams;
     PVector[] ctrlPoints;
@@ -61,10 +62,10 @@ class BezierWall {
     BezierWall(int nbP) {
         nbPoints = max(MIN_NB_POINTS, min(nbP, MAX_NB_POINTS));
         nbCtrlPoints = 2*nbPoints - 2;
+        fixedFirstLastPts = false;
         
-        boolean fixedFirstLastPts = false;
-        initialize(fixedFirstLastPts);
-        generate(fixedFirstLastPts);
+        initialize();
+        generate();
         
         state = S_INIT;
         
@@ -72,13 +73,13 @@ class BezierWall {
     }
     
     // initialize data
-    void initialize(boolean fixedFirstLastPts) {
-        initializePoints(fixedFirstLastPts);
+    void initialize() {
+        initializePoints();
         initializeSounds();
     }
     
     // initialize point data
-    void initializePoints(boolean fixedFirstLastPts) {
+    void initializePoints() {
         PVector tmpFirst = new PVector();
         PVector tmpLast = new PVector();
         if (points != null && fixedFirstLastPts) {
@@ -110,14 +111,14 @@ class BezierWall {
     }
     
     // create Bezier curve
-    void generate(boolean fixedFirstLastPts) {
-        genPts(fixedFirstLastPts);
+    void generate() {
+        genPts();
         genCtrlPts();
         genMotionParams();
     }
     
     // generate points (positions)
-    void genPts(boolean fixedFirstLastPts) {
+    void genPts() {
         if (!fixedFirstLastPts) {
             genFirstLastPts();
         }
@@ -718,6 +719,13 @@ class BezierWall {
     
     //----------CURVE PROPERTIES METHODS----------------------------------------
     
+    // toggle fixed/unfixed end points
+    // (keep same endpoints when regenerating curve or changing nb of points
+    // if set to true)
+    void toggleFixedFirstLastPts() {
+        fixedFirstLastPts = !fixedFirstLastPts;
+    }
+    
     // decrease number of position points
     void decreaseNbPoints() {
         if (nbPoints > MIN_NB_POINTS) {
@@ -726,9 +734,8 @@ class BezierWall {
             
             stopSounds();
             
-            boolean fixedFirstLastPts = true;
-            initialize(fixedFirstLastPts);
-            generate(fixedFirstLastPts);
+            initialize();
+            generate();
         }
     }
     
@@ -740,9 +747,8 @@ class BezierWall {
             
             stopSounds();
             
-            boolean fixedFirstLastPts = true;
-            initialize(fixedFirstLastPts);
-            generate(fixedFirstLastPts);
+            initialize();
+            generate();
         }
     }
     
@@ -752,9 +758,8 @@ class BezierWall {
     void reset() {
         stopSounds();
         
-        boolean fixedFirstLastPts = false;
-        initialize(fixedFirstLastPts);
-        generate(fixedFirstLastPts);
+        initialize();
+        generate();
     }
     
     //----------CURVE STATE METHODS---------------------------------------------
@@ -833,6 +838,14 @@ class BezierWall {
             ellipse(ctrlPointsMotionParams[n + 1][4], ctrlPointsMotionParams[n + 1][5], 7, 7);
             
             n = n + 2;
+        }
+        
+        if (fixedFirstLastPts) {
+            fill(0, 255, 0);
+            text("fixedFirstLastPts = true", width - 150, height - 10);
+        } else {
+            fill(255, 0, 0);
+            text("fixedFirstLastPts = false", width - 150, height - 10);
         }
     }
     
