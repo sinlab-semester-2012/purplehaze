@@ -65,7 +65,7 @@ Each activity has a dedicated folder. In each folder, you will find the main
 Processing sketch to run (the one with the same name as the folder) and 
 additional useful source files.
 
-BezierWall
+BezierWallActivity
 ----------------
 
 Setup and run:
