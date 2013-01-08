@@ -41,7 +41,7 @@ void setup() {
     opencvDebugDisplay = OCVDD_NONE;
     blobDebugDisplay = false;
     
-    maze = new Maze(8, 6);
+    maze = new Maze(4, 3);
 }
 
 void draw() {

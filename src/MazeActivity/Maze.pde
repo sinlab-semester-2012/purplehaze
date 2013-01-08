@@ -3,7 +3,7 @@ class Maze {
     
     final int NB_ENTRANCES = 2;
     
-    final float EDGE_WIDTH = 0.0075*(width + height);
+    final float EDGE_WIDTH = 0.01*(width + height);
     
     final float ENTERING_MAZE_DURATION_MS = 1500;
     
