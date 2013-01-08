@@ -92,6 +92,7 @@ class Halo {
         
         float distance = PVector.sub(pos, otherProjectilePos).mag();
         if (!recentlyHit && distance < haloRadius + PROJECTILE_RADIUS) {
+            prevMillisHit = millis();
             recentlyHit = true;
             hit = true;
         }
@@ -101,9 +102,7 @@ class Halo {
     
     void checkRecentlyHit() {
         if (recentlyHit && millis() - prevMillisHit > HIT_DURATION_MS) {
-            println("BLABLO");
             recentlyHit = false;
-            prevMillisHit = millis();
         }
     }
     
