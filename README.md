@@ -20,11 +20,12 @@ architectural structures.
 
 Projecting light through fog is one interesting way to play with the concept 
 of barriers and frontiers. Using a camera, a projector and theatrical fog, we 
-will reflect on new kinds of human-wall interaction, as well as on their 
-meanings and implications. We will hope to do so through three main activities, 
+want to reflect on new kinds of human-wall interaction, as well as on their 
+meanings and implications. We try to do so through three main activities, 
 each exploring different aspects of structure interaction: the taming of a 
 dynamic Bézier curve (collaborative task), a playful maze escape (individual 
-task), and a lighthearted fight based on halos of light (confrontative task).
+task), and a lighthearted fight based on halos of light (confrontative task),
+with a major focus on the first one.
 
 You might be interested in the following presentation videos:
 - Mid-semester presentation: http://www.youtube.com/watch?v=iN0YAy5bFpE

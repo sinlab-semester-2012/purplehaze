@@ -2,16 +2,20 @@ import codeanticode.gsvideo.*;
 import monclubelec.javacvPro.*;
 
 
-int widthScreen = 1024;
-int heightScreen = 768;
+int widthScreen = 800;
+int heightScreen = 600;
+int fps = 30;
 
 int widthCapture = 640;
 int heightCapture = 480;
 int fpsCapture = 30;
 
 GSCapture cam;
+
 OpenCV opencv;
 Blob[] blobs;
+
+FightingHalos fightingHalos;
 
 int opencvDebugDisplay;
 static final int OCVDD_NONE = 0;
@@ -22,18 +26,17 @@ static final int OCVDD_THRESHOLDED = 4;
 static final int OCVDDSIZE = 5;
 boolean blobDebugDisplay;
 
-FightingHalos fightingHalos;
-
 void setup() {
     size(widthScreen, heightScreen);
     background(0);
     smooth();
+    frameRate(fps);
     
-    frameRate(fpsCapture);
     cam = new GSCapture(this, widthCapture, heightCapture, fpsCapture);
     cam.start();
+    
     opencv = new OpenCV(this);
-    opencv.allocate(widthCapture, heightCapture);
+    opencv.allocate(widthScreen, heightScreen);
     
     opencvDebugDisplay = OCVDD_NONE;
     blobDebugDisplay = false;
@@ -46,7 +49,10 @@ void draw() {
     
     if (cam.available()) {
         cam.read();
-        opencv.copy(cam.get());
+        
+        PImage camImgResized = cam.get();
+        camImgResized.resize(widthScreen, heightScreen);
+        opencv.copy(camImgResized);
         
         opencv.blur();
         if (opencvDebugDisplay == OCVDD_BLURRED_CAPTURED) {
@@ -104,5 +110,23 @@ void keyPressed() {
     } else if (key == '*') {
         toggleBlobDebugDisplay();
     }
+    
+    // DEBUG
+    if (key == 's') {
+        fightingHalos.debugHaloMove(1, new PVector(0, 25, 0));
+    } else if (key == 'w') {
+        fightingHalos.debugHaloMove(1, new PVector(0, -25, 0));
+    } else if (key == 'a') {
+        fightingHalos.debugHaloMove(1, new PVector(-25, 0, 0));
+    } else if (key == 'd') {
+        fightingHalos.debugHaloMove(1, new PVector(25, 0, 0));
+    } else if (key == 'e') {
+        fightingHalos.debugHaloShoot(1);
+    }
+}
+
+// DEBUG
+void mouseReleased() {
+    fightingHalos.debugHaloShoot(0);
 }
 

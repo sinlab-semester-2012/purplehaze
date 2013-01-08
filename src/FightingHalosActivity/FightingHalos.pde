@@ -35,6 +35,47 @@ class FightingHalos {
             halos[0].setPos(blob1Pos);
             //halos[1].setPos(blob2Pos);
         }
+        
+        manageProjectilesHits();
+    }
+    
+    // manage halos projectiles and hits
+    void manageProjectilesHits() {
+        for (int i = 0; i < halos.length; i++) {
+            halos[i].checkRecentlyHit();
+            if (halos[i].isShooting()) {
+                halos[i].checkProjectileExistence();
+                halos[i].moveProjectile();
+                
+                for (int j = 0; j < halos.length; j++) {
+                    if (j != i) {
+                        PVector projectilePos = halos[i].getProjectilePos();
+                        if (halos[j].isHitBy(projectilePos)) {
+                            halos[j].decreaseRadius();
+                            halos[i].increaseRadius();
+                            halos[i].increaseRadius();
+                            
+                            halos[i].destroyProjectile();
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    // debug function for moving halos
+    void debugHaloMove(int haloIndex, PVector movement) {
+        PVector pos = halos[haloIndex].getPos();
+        halos[haloIndex].setPos(PVector.add(pos, movement));
+    }
+    
+    // debug function for testing halos projectile shooting
+    void debugHaloShoot(int haloIndex) {
+        if (haloIndex == 0) {
+            halos[haloIndex].shoot(new PVector(-1, 0, 0));
+        } else if (haloIndex == 1) {
+            halos[haloIndex].shoot(new PVector(1, 0, 0));
+        }
     }
         
     // launch activity (set to running state so that curve is displayed)

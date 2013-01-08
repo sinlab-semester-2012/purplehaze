@@ -2,16 +2,20 @@ import codeanticode.gsvideo.*;
 import monclubelec.javacvPro.*;
 
 
-int widthScreen = 1024;
-int heightScreen = 768;
+int widthScreen = 800;
+int heightScreen = 600;
+int fps = 30;
 
 int widthCapture = 640;
 int heightCapture = 480;
 int fpsCapture = 30;
 
 GSCapture cam;
+
 OpenCV opencv;
 Blob[] blobs;
+
+Maze maze;
 
 int opencvDebugDisplay;
 static final int OCVDD_NONE = 0;
@@ -22,18 +26,17 @@ static final int OCVDD_THRESHOLDED = 4;
 static final int OCVDDSIZE = 5;
 boolean blobDebugDisplay;
 
-Maze maze;
-
 void setup() {
     size(widthScreen, heightScreen);
     background(0);
     smooth();
+    frameRate(fps);
     
-    frameRate(fpsCapture);
     cam = new GSCapture(this, widthCapture, heightCapture, fpsCapture);
     cam.start();
+    
     opencv = new OpenCV(this);
-    opencv.allocate(widthCapture, heightCapture);
+    opencv.allocate(widthScreen, heightScreen);
     
     opencvDebugDisplay = OCVDD_NONE;
     blobDebugDisplay = false;
@@ -46,7 +49,10 @@ void draw() {
     
     if (cam.available()) {
         cam.read();
-        opencv.copy(cam.get());
+        
+        PImage camImgResized = cam.get();
+        camImgResized.resize(widthScreen, heightScreen);
+        opencv.copy(camImgResized);
         
         opencv.blur();
         if (opencvDebugDisplay == OCVDD_BLURRED_CAPTURED) {
