@@ -45,7 +45,9 @@ void setup() {
 }
 
 void draw() {
-    background(0);
+    if (opencvDebugDisplay == OCVDD_NONE) {
+        background(0);
+    }
     
     if (cam.available()) {
         cam.read();
@@ -79,12 +81,12 @@ void draw() {
         }
         
         blobs = opencv.blobs(opencv.Memory2, opencv.area()/64, opencv.area(), 10, false, 4096, false);
-        
-        if (blobDebugDisplay) {
-            opencv.drawRectBlobs(blobs, 0, 0, 1);
-            opencv.drawBlobs(blobs, 0, 0, 1 );
-            opencv.drawCentroidBlobs(blobs, 0, 0, 1);
-        }
+    }
+    
+    if ((blobs != null) && (blobs.length > 0) && blobDebugDisplay) {
+        opencv.drawRectBlobs(blobs, 0, 0, 1);
+        opencv.drawBlobs(blobs, 0, 0, 1 );
+        opencv.drawCentroidBlobs(blobs, 0, 0, 1);
     }
     
     maze.draw();

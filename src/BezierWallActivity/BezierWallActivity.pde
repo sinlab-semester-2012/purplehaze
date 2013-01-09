@@ -53,7 +53,11 @@ void setup() {
 }
 
 void draw() {
-    background(0);
+    // clear image only if we do not display opencv debug information 
+    // (if no subsequent image() call)
+    if (opencvDebugDisplay == OCVDD_NONE) {
+        background(0);
+    }
     
     if (cam.available()) {
         // read image from cam
@@ -107,14 +111,15 @@ void draw() {
         int maxVerticesIn = 4096;
         boolean debug = false;
         blobs = opencv.blobs(opencv.Memory2, minAreaIn, maxAreaIn, maxBlobIn, findHolesIn, maxVerticesIn, debug);
-        // display blob debug information if needed
-        if (blobDebugDisplay) {
-            opencv.drawRectBlobs(blobs, 0, 0, 1);
-            opencv.drawBlobs(blobs, 0, 0, 1 );
-            opencv.drawCentroidBlobs(blobs, 0, 0, 1);
-        }
     }
     
+    // display blob debug information if needed
+    if ((blobs != null) && (blobs.length > 0) && blobDebugDisplay) {
+        opencv.drawRectBlobs(blobs, 0, 0, 1);
+        opencv.drawBlobs(blobs, 0, 0, 1 );
+        opencv.drawCentroidBlobs(blobs, 0, 0, 1);
+    }
+        
     // update Bezier wall
     bezierWall.draw();
     bezierWall.move();
