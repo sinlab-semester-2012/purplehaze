@@ -111,6 +111,10 @@ void draw() {
         int maxVerticesIn = 4096;
         boolean debug = false;
         blobs = opencv.blobs(opencv.Memory2, minAreaIn, maxAreaIn, maxBlobIn, findHolesIn, maxVerticesIn, debug);
+        if ((blobs != null) && (blobs.length > 0)) {
+            // discard non human blobs to avoid detecting the projected curve as a blob
+            discardNonHumanBlobs();
+        }
     }
     
     // display blob debug information if needed
@@ -126,14 +130,38 @@ void draw() {
     bezierWall.interact(blobs);
 }
 
+// discard non human blobs
+// (condition: blob enclosing rectangle is too skewed)
+void discardNonHumanBlobs() {
+    boolean isHuman;
+    int count = 0;
+    Blob[] humanBlobs = new Blob[blobs.length];
+    
+    for (int i = 0; i < blobs.length; i++) {
+        isHuman = !(blobs[i].rectangle.width > 2*blobs[i].rectangle.height) && !(blobs[i].rectangle.height > 2*blobs[i].rectangle.width);
+        if (isHuman) {
+            humanBlobs[count] = blobs[i];
+            count++;
+        }
+    }
+    
+    blobs = new Blob[count];
+    for (int j = 0; j < count; j++) {
+        blobs[j] = humanBlobs[j];
+    }
+}
+
+// toggle OpenCV debug display
 void toggleOpencvDebugDisplay() {
     opencvDebugDisplay = (opencvDebugDisplay + 1) % OCVDDSIZE;
 }
 
+// toggle blob debug display
 void toggleBlobDebugDisplay() {
     blobDebugDisplay = !blobDebugDisplay;
 }
 
+// key pressed event manager
 void keyPressed() {
     if (key == ' ') {
         if (bezierWall.isInInitState()) {
