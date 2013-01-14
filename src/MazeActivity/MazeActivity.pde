@@ -81,6 +81,9 @@ void draw() {
         }
         
         blobs = opencv.blobs(opencv.Memory2, opencv.area()/64, opencv.area(), 10, false, 4096, false);
+        if ((blobs != null) && (blobs.length > 0)) {
+            discardNonHumanBlobs();
+        }
     }
     
     if ((blobs != null) && (blobs.length > 0) && blobDebugDisplay) {
@@ -92,6 +95,27 @@ void draw() {
     maze.draw();
     maze.interact(blobs);
     maze.play();
+}
+
+void discardNonHumanBlobs() {
+    float fillFactor, fillFactorThreshold = 0.5;
+    boolean isHuman;
+    int count = 0;
+    Blob[] humanBlobs = new Blob[blobs.length];
+    
+    for (int i = 0; i < blobs.length; i++) {
+        fillFactor = blobs[i].area/(blobs[i].rectangle.width*blobs[i].rectangle.height);
+        isHuman = (fillFactor > fillFactorThreshold);
+        if (isHuman) {
+            humanBlobs[count] = blobs[i];
+            count++;
+        }
+    }
+    
+    blobs = new Blob[count];
+    for (int j = 0; j < count; j++) {
+        blobs[j] = humanBlobs[j];
+    }
 }
 
 void toggleOpencvDebugDisplay() {

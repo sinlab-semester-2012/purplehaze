@@ -30,7 +30,7 @@ with a major focus on the first one.
 You might be interested in the following presentation videos:
 - Mid-semester presentation: http://www.youtube.com/watch?v=iN0YAy5bFpE
 - End-semester presentation: http://www.youtube.com/watch?v=4D_Fkj3j8Y4
-- Final Presentation: 
+- Final Presentation: https://vimeo.com/57351424
 
 
 Contents
@@ -179,6 +179,6 @@ Week 14:
 Week 17:
 - Improved Bézier Wall visual interactivity, and added an audio component to it.
 - This concludes the final version of the code.
-- Final presentation ().
+- Final presentation (https://vimeo.com/57351424).
 
 --------------------------------------------------------------------------------
